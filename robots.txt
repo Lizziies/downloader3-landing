@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://lizziies.github.io/downloader3-landing/sitemap.xml
