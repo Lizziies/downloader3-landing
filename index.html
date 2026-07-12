@@ -3,8 +3,62 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Downloader&lt;3 — Musik &amp; Videos herunterladen, einfach &amp; schnell</title>
-<meta name="description" content="Downloader<3 lädt Videos & Musik von YouTube, TikTok, Instagram, Facebook und dem Web herunter — in MP4, MP3, WAV, 4K und mehr. Kostenlos starten.">
+<title>Downloader&lt;3 — Free YouTube, TikTok &amp; Instagram Video Downloader (MP4, MP3, 4K)</title>
+<meta name="description" content="Downloader<3: kostenloser YouTube-, TikTok-, Instagram- und Facebook-Downloader. Videos & Musik als MP4, MP3, WAV, bis 4K herunterladen — free YouTube video & audio downloader, works worldwide.">
+<meta name="keywords" content="youtube downloader, youtube downloader free, free youtube download, youtube video downloader, youtube to mp3, youtube to mp3 converter, youtube to mp4, youtube mp4 download, download youtube video, youtube video download free, tiktok downloader, tiktok video downloader, tiktok video download no watermark, save tiktok video, instagram video downloader, instagram reels download, instagram video download, instagram story downloader, facebook video downloader, facebook video download, video downloader, video downloader free, video downloader online, mp3 converter, mp3 downloader, 4k video download, 4k video downloader, video download software, download videos from any website, best free youtube downloader, youtube downloader windows, downloader app, media downloader, playlist downloader, subtitle downloader, video to gif converter, youtube 4k download, kostenloser video downloader, video downloader kostenlos, youtube video herunterladen, youtube mp3 downloaden, tiktok video herunterladen, instagram video herunterladen, downloader<3, downloader herz">
+<link rel="canonical" href="https://lizziies.github.io/downloader3-landing/">
+<meta name="robots" content="index, follow">
+
+<!-- Open Graph / Social Preview -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Downloader<3 — Free YouTube, TikTok & Instagram Downloader">
+<meta property="og:description" content="Videos & Musik von YouTube, TikTok, Instagram, Facebook & dem Web herunterladen — MP4, MP3, WAV, bis 4K. Kostenlos starten.">
+<meta property="og:url" content="https://lizziies.github.io/downloader3-landing/">
+<meta property="og:locale" content="de_DE">
+<meta property="og:locale:alternate" content="en_US">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Downloader<3 — Free YouTube, TikTok & Instagram Downloader">
+<meta name="twitter:description" content="Videos & Musik von YouTube, TikTok, Instagram, Facebook & dem Web herunterladen — MP4, MP3, WAV, bis 4K. Kostenlos starten.">
+
+<!-- Strukturierte Daten (JSON-LD) — hilft Suchmaschinen, die App als
+     Software-Produkt mit Preis/Bewertung in den Suchergebnissen
+     anzuzeigen (Rich Results). -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Downloader<3",
+  "operatingSystem": "Windows",
+  "applicationCategory": "MultimediaApplication",
+  "description": "Kostenloser Downloader für YouTube, TikTok, Instagram, Facebook und das Web — MP4, MP3, WAV und weitere Formate, bis zu 4K Auflösung.",
+  "url": "https://lizziies.github.io/downloader3-landing/",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "EUR"
+  },
+  "author": [
+    { "@type": "Person", "name": "Lisa (Lizziie)" },
+    { "@type": "Person", "name": "Felix" }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Kann ich YouTube-Videos als MP3 herunterladen?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Ja — Link einfügen, MP3 als Format wählen, fertig. Funktioniert genauso mit WAV, M4A und weiteren Audioformaten." } },
+    { "@type": "Question", "name": "Funktioniert es auch mit TikTok ohne Wasserzeichen?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Ja, dafür gibt es die Option 'Ohne Wasserzeichen' bei der Plattformauswahl." } },
+    { "@type": "Question", "name": "Kann ich Instagram Reels herunterladen?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Ja, Instagram-Links inklusive Reels werden unterstützt." } },
+    { "@type": "Question", "name": "Ist Downloader<3 kostenlos?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Ja, die Grundfunktionen (YouTube als MP4, 480p/720p) sind dauerhaft kostenlos. Premium schaltet alle Formate, 4K und weitere Funktionen frei." } }
+  ]
+}
+</script>
 <style>
   :root {
     --pink: #EC4899;
@@ -119,15 +173,54 @@
   }
 
   /* ---------- Steps ---------- */
-  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; counter-reset: step; }
-  .step { text-align: center; padding: 0 12px; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; counter-reset: step; position: relative; }
+  .step {
+    text-align: center; padding: 20px 16px; position: relative;
+    border-radius: 16px; border: 1px solid transparent; transition: transform .25s ease, border-color .25s ease, background .25s ease;
+  }
+  .step:hover { transform: translateY(-4px); border-color: rgba(236,72,153,.35); background: rgba(236,72,153,.05); }
+  /* Verbindungslinie zwischen den Schritten (nur Desktop) */
+  .steps { position: relative; }
+  @media (min-width: 720px) {
+    .step:not(:last-child)::after {
+      content: ""; position: absolute; top: 32px; left: calc(50% + 32px); width: calc(100% - 64px);
+      height: 2px; background: repeating-linear-gradient(90deg, var(--pink) 0 6px, transparent 6px 12px);
+      opacity: .5; z-index: 0;
+    }
+  }
   .step .num {
     counter-increment: step; width: 40px; height: 40px; border-radius: 50%;
     background: linear-gradient(135deg, var(--pink), var(--pink-dark)); color: #fff; font-weight: 800;
     display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 16px;
+    position: relative; z-index: 1; box-shadow: 0 0 0 6px var(--bg2), 0 6px 18px rgba(236,72,153,.4);
   }
   .step h3 { font-size: 16px; margin: 0 0 8px; }
-  .step p { color: var(--muted); font-size: 14px; margin: 0; }
+  .step p { color: var(--muted); font-size: 14px; margin: 0 0 14px; }
+  /* Kleine, rein dekorative Live-Vorschau je Schritt (CSS-Animation) */
+  .step-demo {
+    height: 34px; border-radius: 8px; background: var(--card); border: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 10px; font-size: 12px; color: var(--muted);
+    overflow: hidden; position: relative;
+  }
+  .step-demo.link span { animation: typeLink 3.5s steps(28) infinite; white-space: nowrap; overflow: hidden; border-right: 2px solid var(--pink); display: inline-block; }
+  @keyframes typeLink {
+    0%, 8% { width: 0; } 55%, 80% { width: 15ch; } 100% { width: 15ch; }
+  }
+  .step-demo.fmt { gap: 6px; }
+  .step-demo.fmt .chip {
+    padding: 3px 9px; border-radius: 999px; border: 1px solid var(--border); font-size: 11px;
+    animation: chipPulse 3.5s ease-in-out infinite;
+  }
+  .step-demo.fmt .chip:nth-child(2) { animation-delay: .3s; }
+  .step-demo.fmt .chip:nth-child(3) { animation-delay: .6s; }
+  @keyframes chipPulse {
+    0%, 100% { background: transparent; color: var(--muted); border-color: var(--border); }
+    45%, 65% { background: var(--pink); color: #fff; border-color: var(--pink); }
+  }
+  .step-demo.bar { padding: 0; }
+  .step-demo.bar .track { width: 100%; height: 8px; border-radius: 999px; background: rgba(255,255,255,.08); margin: 0 10px; overflow: hidden; }
+  .step-demo.bar .fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--pink), var(--pink-dark)); width: 0%; animation: fillBar 3.5s ease-in-out infinite; }
+  @keyframes fillBar { 0%, 10% { width: 0%; } 85%, 100% { width: 100%; } }
 
   /* ---------- Pricing teaser ---------- */
   .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
@@ -271,7 +364,7 @@
     urheberrechtlich geschützter Inhalte kann gegen die Nutzungsbedingungen der
     jeweiligen Plattform verstoßen.
   </p>
-  <p style="margin-top:14px; opacity:.7;">Created by developers Lisa &amp; Felix</p>
+  <p style="margin-top:14px; opacity:.7;">Made by Lisa (Lizziie) &amp; Felix 💜</p>
 </footer>
 
 <script>
@@ -284,9 +377,9 @@
       nav_pricing2: "Premium kaufen",
       nav_faq: "FAQ",
       nav_download: "Download",
-      eyebrow: "💜 KOSTENLOS FÜR WINDOWS",
-      hero_title: 'Videos &amp; Musik laden — <span class="accent">in einer App.</span>',
-      hero_lead: "YouTube, TikTok, Instagram, Facebook und fast jede Webseite — als MP4, MP3, WAV und mehr. Bis zu 4K, mit KI-Modus, Untertitel-Übersetzung und einem Design, das dir gehört.",
+      eyebrow: "💜 KOSTENLOSER YOUTUBE, TIKTOK &amp; INSTAGRAM DOWNLOADER",
+      hero_title: 'Kostenlos YouTube, TikTok &amp; Instagram <span class="accent">Videos herunterladen.</span>',
+      hero_lead: "Free YouTube-, TikTok-, Instagram- und Facebook-Downloader — als MP4, MP3, WAV und mehr. Bis zu 4K, mit KI-Modus, Untertitel-Übersetzung und einem Design, das dir gehört. Funktioniert weltweit.",
       hero_cta_primary: "⬇ Jetzt kostenlos herunterladen",
       hero_cta_secondary: "Was kann die App?",
       hero_note: "Für Windows 10/11 · Kostenloses Konto zum Start nötig · Premium optional",
@@ -327,9 +420,9 @@
         ["🚦", "Bandbreite &amp; Proxy", "Download-Geschwindigkeit begrenzen und eine Proxy-/VPN-Adresse hinterlegen — volle Kontrolle über die Verbindung."],
       ],
       steps: [
-        ["Link einfügen", "Video- oder Audio-Link aus YouTube, TikTok, Instagram, Facebook oder dem Web kopieren und einfügen."],
-        ["Format &amp; Auflösung wählen", "Zwischen MP4, MP3 und vielen weiteren Formaten wählen — oder den KI-Modus einfach automatisch entscheiden lassen."],
-        ["Herunterladen", "Ein Klick auf Download — fertig landet die Datei direkt im gewünschten Ordner, mit Fortschrittsanzeige in Echtzeit."],
+        ["Link einfügen", "Video- oder Audio-Link aus YouTube, TikTok, Instagram, Facebook, SoundCloud, Discord-Servern oder dem Web kopieren und einfügen — auch ganze Kanäle/Playlists auf einmal."],
+        ["Format &amp; Auflösung wählen", "Zwischen MP4, MP3, WAV, FLAC und vielen weiteren Formaten wählen — oder den KI-Modus einfach automatisch entscheiden lassen."],
+        ["Herunterladen", "Ein Klick auf Download — die Datei landet automatisch sauber sortiert im richtigen Unterordner, mit Fortschrittsanzeige in Echtzeit."],
       ],
       pricing: [
         ["Gratis", "0 €", "für immer", ["YouTube-Links als MP4", "480p &amp; 720p Auflösung", "Favoriten &amp; Verlauf", "Individuelles Design"], false],
@@ -343,6 +436,10 @@
         ["Was kostet Premium?", "Premium gibt es zeitlich begrenzt (z. B. 30 Tage) oder dauerhaft — bezahlt einmalig und sicher über PayPal. Kein Abo, keine automatische Verlängerung."],
         ["Welche Auflösungen sind kostenlos?", "480p und 720p sind komplett kostenlos nutzbar. 1080p, 1440p und 4K sowie automatisches Hochskalieren sind Premium-Funktionen."],
         ["Für welches Betriebssystem?", "Aktuell für Windows 10/11 optimiert (inkl. individueller Fensterform). Die App läuft technisch auch auf Mac/Linux über Python, einige optische Extras sind dort eingeschränkt."],
+        ["Kann ich YouTube-Videos als MP3 herunterladen?", "Ja — Link einfügen, MP3 als Format wählen, fertig. Funktioniert genauso mit WAV, M4A und weiteren Audioformaten, inklusive automatisch eingebettetem Titel, Interpret und Cover."],
+        ["Funktioniert es auch mit TikTok ohne Wasserzeichen?", "Ja, dafür gibt es die Option '🚫 Ohne Wasserzeichen' bei der Plattformauswahl."],
+        ["Kann ich Instagram Reels und Storys herunterladen?", "Ja, Instagram-Links (inkl. Reels) werden unterstützt. Ganze private Alben brauchen einen Login und funktionieren technisch bedingt nicht — direkte Bild-/Video-Links aber schon."],
+        ["Funktioniert Downloader<3 weltweit?", "Ja, die App ist zweisprachig (Deutsch/Englisch) und funktioniert unabhängig vom Standort. Einzelne Inhalte können je nach Plattform regional eingeschränkt sein — das liegt dann an der jeweiligen Plattform, nicht an der App."],
       ],
     },
     en: {
@@ -353,9 +450,9 @@
       nav_pricing2: "Buy Premium",
       nav_faq: "FAQ",
       nav_download: "Download",
-      eyebrow: "💜 FREE FOR WINDOWS",
-      hero_title: 'Download videos &amp; music — <span class="accent">one app.</span>',
-      hero_lead: "YouTube, TikTok, Instagram, Facebook and almost any website — as MP4, MP3, WAV and more. Up to 4K, with AI mode, subtitle translation, and a design that's truly yours.",
+      eyebrow: "💜 FREE YOUTUBE, TIKTOK &amp; INSTAGRAM DOWNLOADER",
+      hero_title: 'Free YouTube, TikTok &amp; Instagram <span class="accent">video downloader.</span>',
+      hero_lead: "Download videos & music from YouTube, TikTok, Instagram, Facebook and almost any website — as MP4, MP3, WAV and more. Up to 4K, with AI mode, subtitle translation, and a design that's truly yours. Works worldwide.",
       hero_cta_primary: "⬇ Download for free",
       hero_cta_secondary: "See what it can do",
       hero_note: "For Windows 10/11 · Free account needed to start · Premium optional",
@@ -396,9 +493,9 @@
         ["🚦", "Bandwidth &amp; proxy", "Limit download speed and set a proxy/VPN address — full control over the connection."],
       ],
       steps: [
-        ["Paste a link", "Copy a video or audio link from YouTube, TikTok, Instagram, Facebook, or the web and paste it in."],
-        ["Choose format &amp; resolution", "Pick from MP4, MP3, and many more formats — or let AI mode decide automatically."],
-        ["Download", "One click on Download — the file lands right in your chosen folder, with a live progress bar."],
+        ["Paste a link", "Copy a video or audio link from YouTube, TikTok, Instagram, Facebook, SoundCloud, Discord servers, or the web and paste it in — even whole channels/playlists at once."],
+        ["Choose format &amp; resolution", "Pick from MP4, MP3, WAV, FLAC, and many more formats — or let AI mode decide automatically."],
+        ["Download", "One click on Download — the file lands neatly sorted into the right subfolder automatically, with a live progress bar."],
       ],
       pricing: [
         ["Free", "€0", "forever", ["YouTube links as MP4", "480p &amp; 720p resolution", "Favorites &amp; history", "Custom design"], false],
@@ -412,6 +509,10 @@
         ["What does Premium cost?", "Premium is available for a limited time (e.g. 30 days) or forever — paid once, securely via PayPal. No subscription, no auto-renewal."],
         ["Which resolutions are free?", "480p and 720p are fully free. 1080p, 1440p, 4K, and auto-upscaling are Premium features."],
         ["Which operating system?", "Currently optimized for Windows 10/11 (including custom window shapes). The app technically also runs on Mac/Linux via Python, with some visual extras limited there."],
+        ["Can I download YouTube videos as MP3?", "Yes — paste the link, choose MP3 as the format, done. Works the same for WAV, M4A, and more audio formats, including automatically embedded title, artist, and cover art."],
+        ["Does it work with TikTok without a watermark?", "Yes, there's a '🚫 No watermark' option in the platform selector."],
+        ["Can I download Instagram Reels and stories?", "Yes, Instagram links (including Reels) are supported. Whole private albums need a login and technically don't work — but direct image/video links do."],
+        ["Does Downloader<3 work worldwide?", "Yes, the app is bilingual (German/English) and works regardless of location. Individual content may be regionally restricted depending on the platform — that's on the platform's side, not the app."],
       ],
     },
   };
@@ -431,13 +532,20 @@
     `).join("");
   }
 
+  const STEP_DEMOS = [
+    `<div class="step-demo link"><span>youtube.com/watch?v=…</span></div>`,
+    `<div class="step-demo fmt"><span class="chip">MP4</span><span class="chip">MP3</span><span class="chip">4K</span></div>`,
+    `<div class="step-demo bar"><div class="track"><div class="fill"></div></div></div>`,
+  ];
+
   function renderSteps() {
     const grid = document.getElementById("steps-grid");
-    grid.innerHTML = t("steps").map(([title, desc]) => `
+    grid.innerHTML = t("steps").map(([title, desc], i) => `
       <div class="step">
         <div class="num"></div>
         <h3>${title}</h3>
         <p>${desc}</p>
+        ${STEP_DEMOS[i] || ""}
       </div>
     `).join("");
   }
