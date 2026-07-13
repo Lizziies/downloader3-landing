@@ -158,10 +158,16 @@
   .swatch.active { border-color: #fff; }
   .color-custom-row { display: flex; align-items: center; gap: 8px; }
   .color-custom-row input[type="color"] {
-    width: 34px; height: 34px; border: none; border-radius: 8px; padding: 0; background: none; cursor: pointer;
+    width: 34px; height: 34px; border: none; border-radius: 50%; padding: 0;
+    background: none; cursor: pointer; overflow: hidden;
+    -webkit-appearance: none; appearance: none;
   }
+  /* Innere Farbfläche des Farbwählers ebenfalls rund (Chrome/Edge) */
+  .color-custom-row input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+  .color-custom-row input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
+  .color-custom-row input[type="color"]::-moz-color-swatch { border: none; border-radius: 50%; }
   .color-reset {
-    background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 8px;
+    background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 999px;
     padding: 6px 10px; font-size: 12px; cursor: pointer; transition: all .2s var(--ease);
   }
   .color-reset:hover { border-color: var(--pink); color: var(--pink); }
