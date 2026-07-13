@@ -459,6 +459,26 @@
   })();
 
   setLang(lang);
+
+  // 🐛 FIX ("Farbe kommt beim Zurück-Wischen nicht mit"): Wischt/klickt
+  // man zurück, holt der Browser die Seite oft aus dem Back-Forward-
+  // Cache, OHNE sie neu zu laden — das Farb-Skript im <head> läuft dann
+  // nicht erneut und die alte Farbe bleibt stehen. Deshalb: bei
+  // pageshow (Cache-Restore) und storage (Änderung in anderem Tab/der
+  // anderen Seite) die gespeicherte Farbe sofort neu anwenden.
+  function reapplySavedAccent() {
+    try {
+      const raw = localStorage.getItem("dl3_landing_accent");
+      if (raw) { applyAccent(JSON.parse(raw).base, false); }
+      else { applyAccent("#EC4899", false); }
+    } catch (e) {}
+  }
+  window.addEventListener("pageshow", (e) => {
+    if (e.persisted) reapplySavedAccent();
+  });
+  window.addEventListener("storage", (e) => {
+    if (e.key === "dl3_landing_accent") reapplySavedAccent();
+  });
 </script>
 </body>
 </html>
