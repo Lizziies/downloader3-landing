@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Datenschutzerklärung — Downloader&lt;3</title>
+<title>Datenschutzerklärung / Privacy Policy — Downloader&lt;3</title>
 <meta name="robots" content="noindex, follow">
 
 <!-- 🎨 Gespeicherte Akzentfarbe SOFORT anwenden (gleicher Speicher wie die
@@ -39,7 +39,6 @@
     background: var(--bg); color: var(--text); line-height: 1.65;
     -webkit-font-smoothing: antialiased; position: relative; overflow-x: hidden;
   }
-  /* Dezente, schwebende Hintergrund-Glows wie auf der Landingpage */
   body::before, body::after {
     content: ""; position: fixed; border-radius: 50%; filter: blur(70px);
     pointer-events: none; z-index: 0; opacity: .45;
@@ -57,12 +56,21 @@
   .reveal.in { opacity: 1; transform: translateY(0); }
   @media (prefers-reduced-motion: reduce) { .reveal, .reveal.in { opacity: 1; transform: none; transition: none; } }
 
+  .top-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 10px; }
   .back {
     display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
-    color: var(--muted); font-size: 14px; margin-bottom: 28px;
+    color: var(--muted); font-size: 14px;
     transition: color .2s var(--ease), transform .25s var(--ease-spring);
   }
   .back:hover { color: var(--pink); transform: translateX(-4px); }
+  .lang-switch button {
+    background: transparent; border: 1px solid var(--border); color: var(--muted);
+    border-radius: 999px; padding: 5px 14px; font-size: 12px; cursor: pointer; margin-left: 6px;
+    transition: all .2s var(--ease);
+  }
+  .lang-switch button:hover { border-color: var(--pink); color: var(--pink); }
+  .lang-switch button.active { border-color: var(--pink); color: var(--pink); background: var(--pink-glow2); }
+
   h1 { font-size: 30px; font-weight: 800; margin: 0 0 6px; letter-spacing: -.01em; }
   @keyframes heartbeat {
     0%, 100% { transform: scale(1); }
@@ -73,26 +81,19 @@
   }
   h1 .heart { color: var(--pink); display: inline-block; animation: heartbeat 2.4s ease-in-out infinite; }
   .sub { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
-  h2 { font-size: 18px; font-weight: 700; margin: 32px 0 10px; color: var(--pink); }
+  h2 { font-size: 18px; font-weight: 700; margin: 4px 0 10px; color: var(--pink); }
   p, li { margin: 0 0 12px; font-size: 15px; color: #D1D5DB; }
   ul { padding-left: 20px; }
 
   .section-card {
     background: var(--card); border: 1px solid var(--border); border-radius: 16px;
-    padding: 4px 24px 10px; margin-bottom: 14px;
+    padding: 20px 24px 10px; margin-bottom: 14px;
     transition: border-color .35s var(--ease), transform .35s var(--ease), box-shadow .35s var(--ease);
   }
   .section-card:hover {
     border-color: var(--pink-glow); transform: translateY(-3px);
     box-shadow: 0 16px 36px rgba(0,0,0,.3);
   }
-
-  .todo {
-    background: rgba(251,191,36,.08); border: 1px solid rgba(251,191,36,.4);
-    border-radius: 14px; padding: 14px 18px; font-size: 13px; color: #FCD34D;
-    margin-bottom: 16px;
-  }
-  .todo b { color: #FDE68A; }
   .good {
     background: rgba(52,211,153,.08); border: 1px solid rgba(52,211,153,.35);
     border-radius: 14px; padding: 14px 18px; font-size: 13px; color: #6EE7B7;
@@ -129,7 +130,7 @@
   body:hover .cursor-glow { opacity: .8; }
   @media (hover: none), (prefers-reduced-motion: reduce) { .cursor-glow { display: none; } }
 
-  /* ---------- 🎨 Farbwähler (gleich wie Landingpage) ---------- */
+  /* ---------- 🎨 Farbwähler ---------- */
   .color-fab {
     position: fixed; bottom: 22px; right: 22px; z-index: 90;
     width: 52px; height: 52px; border-radius: 50%; border: none; cursor: pointer;
@@ -169,131 +170,160 @@
 <body>
 <div class="cursor-glow" id="cursor-glow"></div>
 <div class="wrap">
-  <a class="back reveal" href="./index.html">← Zurück zur Startseite</a>
-  <h1 class="reveal">Datenschutzerklärung <span class="heart">💜</span></h1>
-  <p class="sub reveal">Informationen gemäß Art. 13 DSGVO — Stand: Juli 2026</p>
-
-  <div class="good reveal">
-    ✓ <b>Das Wichtigste zuerst:</b> Diese Webseite verwendet <b>keine
-    Tracking-Cookies</b>, <b>keine Analyse-Tools</b> (kein Google Analytics
-    o.&nbsp;ä.) und <b>keine Werbung</b>. Es wird kein Nutzerverhalten
-    aufgezeichnet oder an Dritte verkauft.
+  <div class="top-row reveal">
+    <a class="back" href="./index.html" data-i18n="back">← Zurück zur Startseite</a>
+    <span class="lang-switch">
+      <button id="btn-de" onclick="setLang('de')">DE</button>
+      <button id="btn-en" onclick="setLang('en')">EN</button>
+    </span>
   </div>
+  <h1 class="reveal"><span data-i18n="title">Datenschutzerklärung</span> <span class="heart">💜</span></h1>
+  <p class="sub reveal" data-i18n="sub">Informationen gemäß Art. 13 DSGVO — Stand: Juli 2026</p>
 
-  <div class="section-card reveal">
-    <h2>1. Kontakt</h2>
-    <p>
-      Bei Fragen zum Datenschutz erreichst du uns per E-Mail:
-      <a class="mail" href="mailto:Lisawer008@gmail.com">Lisawer008@gmail.com</a>
-    </p>
-  </div>
+  <div class="good reveal" data-i18n-html="good"></div>
 
-  <div class="section-card reveal">
-    <h2>2. Hosting (GitHub Pages)</h2>
-    <p>
-      Diese Webseite wird bei GitHub Pages gehostet, einem Dienst der GitHub,
-      Inc., 88 Colin P. Kelly Jr. St., San Francisco, CA 94107, USA. Beim Aufruf
-      der Seite verarbeitet GitHub technisch notwendige Daten wie die IP-Adresse
-      des Besuchers in Server-Logdateien, um die Seite auszuliefern und die
-      Sicherheit des Dienstes zu gewährleisten (Rechtsgrundlage: berechtigtes
-      Interesse, Art. 6 Abs. 1 lit. f DSGVO). Auf diese Verarbeitung haben wir
-      keinen Einfluss. Details in der
-      <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">Datenschutzerklärung von GitHub</a>.
-      Die Übertragung erfolgt SSL-verschlüsselt (HTTPS).
-    </p>
-  </div>
+  <div id="ds-sections"></div>
 
-  <div class="section-card reveal">
-    <h2>3. Lokal gespeicherte Einstellungen (localStorage)</h2>
-    <p>
-      Diese Seite speichert ausschließlich funktionale Einstellungen lokal in
-      deinem Browser (localStorage): deine Sprachwahl (Deutsch/Englisch), deine
-      gewählte Akzentfarbe und ob du den Datenschutz-Hinweis bereits gesehen
-      hast. Diese Daten verlassen dein Gerät zu keinem Zeitpunkt, werden nicht
-      an uns oder Dritte übertragen und enthalten keine personenbezogenen
-      Informationen. Du kannst sie jederzeit über die Browser-Einstellungen
-      („Websitedaten löschen") entfernen. Da es sich um rein funktionale, vom
-      Nutzer aktiv gewählte Einstellungen handelt, ist hierfür keine
-      Einwilligung erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG).
-    </p>
-  </div>
-
-  <div class="section-card reveal">
-    <h2>4. Bezahlseite: PayPal</h2>
-    <p>
-      Der Kauf von Premium-Codes findet auf einer separaten Bezahlseite statt
-      und wird über PayPal abgewickelt (PayPal (Europe) S.à r.l. et Cie, S.C.A.,
-      22-24 Boulevard Royal, L-2449 Luxemburg). Beim Laden der Bezahlseite wird
-      das PayPal-Bezahlformular direkt von PayPal-Servern eingebunden; dabei
-      erhält PayPal technisch bedingt deine IP-Adresse. Führst du eine Zahlung
-      durch, verarbeitet PayPal die von dir dort eingegebenen Zahlungsdaten in
-      eigener Verantwortung (Art. 6 Abs. 1 lit. b DSGVO — Vertragserfüllung).
-      Details in der
-      <a href="https://www.paypal.com/de/legalhub/privacy-full" target="_blank" rel="noopener">Datenschutzerklärung von PayPal</a>.
-    </p>
-    <p>
-      Zusätzlich wird die von dir auf der Bezahlseite angegebene E-Mail-Adresse
-      an unseren Server übertragen und dort gespeichert, um deinen Premium-Code
-      an dein App-Konto zu binden und den Kauf zuordnen zu können
-      (Art. 6 Abs. 1 lit. b DSGVO — Vertragserfüllung).
-    </p>
-  </div>
-
-  <div class="section-card reveal">
-    <h2>5. Konto in der App</h2>
-    <p>
-      Für die Nutzung der Downloader&lt;3-App ist ein Konto mit E-Mail-Adresse
-      erforderlich. Die E-Mail wird ausschließlich zur Konto-Verifizierung
-      (Bestätigungscode) und zur Zuordnung von Premium-Käufen verwendet — nicht
-      für Werbung und nicht zur Weitergabe an Dritte.
-    </p>
-  </div>
-
-  <div class="section-card reveal">
-    <h2>6. Deine Rechte</h2>
-    <ul>
-      <li>Auskunft über deine gespeicherten Daten (Art. 15 DSGVO)</li>
-      <li>Berichtigung unrichtiger Daten (Art. 16 DSGVO)</li>
-      <li>Löschung („Recht auf Vergessenwerden", Art. 17 DSGVO)</li>
-      <li>Einschränkung der Verarbeitung (Art. 18 DSGVO)</li>
-      <li>Datenübertragbarkeit (Art. 20 DSGVO)</li>
-      <li>Widerspruch gegen die Verarbeitung (Art. 21 DSGVO)</li>
-      <li>Beschwerde bei einer Datenschutz-Aufsichtsbehörde (Art. 77 DSGVO)</li>
-    </ul>
-    <p>
-      Zur Ausübung deiner Rechte genügt eine formlose E-Mail an
-      <a class="mail" href="mailto:Lisawer008@gmail.com">Lisawer008@gmail.com</a>.
-    </p>
-  </div>
-
-  <footer class="reveal">💜 Downloader&lt;3 — <a href="./index.html">Startseite</a></footer>
+  <footer class="reveal">💜 Downloader&lt;3 — <a href="./index.html" data-i18n="home">Startseite</a></footer>
 </div>
 
 <!-- 🎨 Farbwähler (teilt sich die gespeicherte Farbe mit der Landingpage) -->
 <button class="color-fab" id="color-fab" title="Farbe anpassen" aria-label="Farbe anpassen">🎨</button>
 <div class="color-panel" id="color-panel">
-  <div class="color-panel-title">Akzentfarbe</div>
+  <div class="color-panel-title" data-i18n="color_title">Akzentfarbe</div>
   <div class="swatch-row" id="swatch-row"></div>
   <div class="color-custom-row">
     <input type="color" id="color-custom" value="#EC4899">
-    <button class="color-reset" id="color-reset">Zurücksetzen</button>
+    <button class="color-reset" id="color-reset" data-i18n="color_reset">Zurücksetzen</button>
   </div>
 </div>
 
 <script>
-  // ---------- Scroll-Reveal ----------
-  const revealObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("in");
-        revealObserver.unobserve(entry.target);
-      }
+  const MAIL = `<a class="mail" href="mailto:Lisawer008@gmail.com">Lisawer008@gmail.com</a>`;
+
+  const I18N = {
+    de: {
+      back: "← Zurück zur Startseite",
+      home: "Startseite",
+      title: "Datenschutzerklärung",
+      sub: "Informationen gemäß Art. 13 DSGVO — Stand: Juli 2026",
+      color_title: "Akzentfarbe",
+      color_reset: "Zurücksetzen",
+      good: "✓ <b>Das Wichtigste zuerst:</b> Diese Webseite verwendet <b>keine Tracking-Cookies</b>, <b>keine Analyse-Tools</b> (kein Google Analytics o.&nbsp;ä.) und <b>keine Werbung</b>. Es wird kein Nutzerverhalten aufgezeichnet oder an Dritte verkauft.",
+      sections: [
+        ["1. Kontakt",
+         [`Bei Fragen zum Datenschutz erreichst du uns per E-Mail: ${MAIL}`]],
+        ["2. Hosting (GitHub Pages)",
+         [`Diese Webseite wird bei GitHub Pages gehostet, einem Dienst der GitHub, Inc., 88 Colin P. Kelly Jr. St., San Francisco, CA 94107, USA. Beim Aufruf der Seite verarbeitet GitHub technisch notwendige Daten wie die IP-Adresse des Besuchers in Server-Logdateien, um die Seite auszuliefern und die Sicherheit des Dienstes zu gewährleisten (Rechtsgrundlage: berechtigtes Interesse, Art. 6 Abs. 1 lit. f DSGVO). Auf diese Verarbeitung haben wir keinen Einfluss. Details in der <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">Datenschutzerklärung von GitHub</a>. Die Übertragung erfolgt SSL-verschlüsselt (HTTPS).`]],
+        ["3. Lokal gespeicherte Einstellungen (localStorage)",
+         [`Diese Seite speichert ausschließlich funktionale Einstellungen lokal in deinem Browser (localStorage): deine Sprachwahl (Deutsch/Englisch), deine gewählte Akzentfarbe und ob du den Datenschutz-Hinweis bereits gesehen hast. Diese Daten verlassen dein Gerät zu keinem Zeitpunkt, werden nicht an uns oder Dritte übertragen und enthalten keine personenbezogenen Informationen. Du kannst sie jederzeit über die Browser-Einstellungen („Websitedaten löschen") entfernen. Da es sich um rein funktionale, vom Nutzer aktiv gewählte Einstellungen handelt, ist hierfür keine Einwilligung erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG).`]],
+        ["4. Bezahlseite: PayPal",
+         [`Der Kauf von Premium-Codes findet auf einer separaten Bezahlseite statt und wird über PayPal abgewickelt (PayPal (Europe) S.à r.l. et Cie, S.C.A., 22-24 Boulevard Royal, L-2449 Luxemburg). Beim Laden der Bezahlseite wird das PayPal-Bezahlformular direkt von PayPal-Servern eingebunden; dabei erhält PayPal technisch bedingt deine IP-Adresse. Führst du eine Zahlung durch, verarbeitet PayPal die von dir dort eingegebenen Zahlungsdaten in eigener Verantwortung (Art. 6 Abs. 1 lit. b DSGVO — Vertragserfüllung). Details in der <a href="https://www.paypal.com/de/legalhub/privacy-full" target="_blank" rel="noopener">Datenschutzerklärung von PayPal</a>.`,
+          `Zusätzlich wird die von dir auf der Bezahlseite angegebene E-Mail-Adresse an unseren Server übertragen und dort gespeichert, um deinen Premium-Code an dein App-Konto zu binden und den Kauf zuordnen zu können (Art. 6 Abs. 1 lit. b DSGVO — Vertragserfüllung).`]],
+        ["5. Konto in der App",
+         [`Für die Nutzung der Downloader&lt;3-App ist ein Konto mit E-Mail-Adresse erforderlich. Die E-Mail wird ausschließlich zur Konto-Verifizierung (Bestätigungscode) und zur Zuordnung von Premium-Käufen verwendet — nicht für Werbung und nicht zur Weitergabe an Dritte.`]],
+        ["6. Deine Rechte",
+         [`<ul>
+            <li>Auskunft über deine gespeicherten Daten (Art. 15 DSGVO)</li>
+            <li>Berichtigung unrichtiger Daten (Art. 16 DSGVO)</li>
+            <li>Löschung („Recht auf Vergessenwerden", Art. 17 DSGVO)</li>
+            <li>Einschränkung der Verarbeitung (Art. 18 DSGVO)</li>
+            <li>Datenübertragbarkeit (Art. 20 DSGVO)</li>
+            <li>Widerspruch gegen die Verarbeitung (Art. 21 DSGVO)</li>
+            <li>Beschwerde bei einer Datenschutz-Aufsichtsbehörde (Art. 77 DSGVO)</li>
+          </ul>`,
+          `Zur Ausübung deiner Rechte genügt eine formlose E-Mail an ${MAIL}.`]],
+      ],
+    },
+    en: {
+      back: "← Back to homepage",
+      home: "Homepage",
+      title: "Privacy Policy",
+      sub: "Information pursuant to Art. 13 GDPR — Last updated: July 2026",
+      color_title: "Accent color",
+      color_reset: "Reset",
+      good: "✓ <b>The most important part first:</b> This website uses <b>no tracking cookies</b>, <b>no analytics tools</b> (no Google Analytics or similar) and <b>no advertising</b>. No user behavior is recorded or sold to third parties.",
+      sections: [
+        ["1. Contact",
+         [`For any privacy-related questions, you can reach us by email: ${MAIL}`]],
+        ["2. Hosting (GitHub Pages)",
+         [`This website is hosted on GitHub Pages, a service of GitHub, Inc., 88 Colin P. Kelly Jr. St., San Francisco, CA 94107, USA. When you visit the site, GitHub processes technically necessary data such as your IP address in server log files in order to deliver the page and ensure the security of the service (legal basis: legitimate interest, Art. 6(1)(f) GDPR). We have no influence on this processing. Details can be found in <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">GitHub's privacy statement</a>. All data is transferred SSL-encrypted (HTTPS).`]],
+        ["3. Locally stored settings (localStorage)",
+         [`This site stores only functional settings locally in your browser (localStorage): your language choice (German/English), your chosen accent color, and whether you have already seen the privacy notice. This data never leaves your device, is not transmitted to us or any third party, and contains no personal information. You can remove it at any time via your browser settings ("Clear site data"). Since these are purely functional settings actively chosen by you, no consent is required for them (§ 25 (2) no. 2 of the German TDDDG).`]],
+        ["4. Checkout page: PayPal",
+         [`Premium codes are purchased on a separate checkout page and processed via PayPal (PayPal (Europe) S.à r.l. et Cie, S.C.A., 22-24 Boulevard Royal, L-2449 Luxembourg). When the checkout page loads, the PayPal payment form is embedded directly from PayPal's servers; as a technical consequence, PayPal receives your IP address. If you make a payment, PayPal processes the payment details you enter there under its own responsibility (Art. 6(1)(b) GDPR — performance of a contract). Details in <a href="https://www.paypal.com/us/legalhub/privacy-full" target="_blank" rel="noopener">PayPal's privacy statement</a>.`,
+          `In addition, the email address you provide on the checkout page is transmitted to and stored on our server in order to tie your Premium code to your app account and match the purchase (Art. 6(1)(b) GDPR — performance of a contract).`]],
+        ["5. Account in the app",
+         [`Using the Downloader&lt;3 app requires an account with an email address. The email is used exclusively for account verification (confirmation code) and for matching Premium purchases — not for advertising and never shared with third parties.`]],
+        ["6. Your rights",
+         [`<ul>
+            <li>Access to your stored data (Art. 15 GDPR)</li>
+            <li>Rectification of inaccurate data (Art. 16 GDPR)</li>
+            <li>Erasure ("right to be forgotten", Art. 17 GDPR)</li>
+            <li>Restriction of processing (Art. 18 GDPR)</li>
+            <li>Data portability (Art. 20 GDPR)</li>
+            <li>Objection to processing (Art. 21 GDPR)</li>
+            <li>Complaint to a data protection supervisory authority (Art. 77 GDPR)</li>
+          </ul>`,
+          `To exercise your rights, an informal email to ${MAIL} is all it takes.`]],
+      ],
+    },
+  };
+
+  // 🌍 Sprach-Priorität: 1) ?lang=de/en in der URL (kommt z. B. vom
+  // Datenschutz-Link der Checkout-Seite mit), 2) gespeicherte Wahl der
+  // Landingpage, 3) Browser-Sprache.
+  const urlLang = new URLSearchParams(location.search).get("lang");
+  let lang = (urlLang === "de" || urlLang === "en") ? urlLang
+    : (localStorage.getItem("dl3_landing_lang")
+       || (navigator.language.startsWith("de") ? "de" : "en"));
+
+  function t(key) { return I18N[lang][key]; }
+
+  function renderSections() {
+    const holder = document.getElementById("ds-sections");
+    holder.innerHTML = t("sections").map(([h, paras]) => `
+      <div class="section-card reveal">
+        <h2>${h}</h2>
+        ${paras.map(p => p.startsWith("<ul") ? p : `<p>${p}</p>`).join("")}
+      </div>
+    `).join("");
+  }
+
+  function setLang(newLang) {
+    lang = newLang;
+    localStorage.setItem("dl3_landing_lang", lang);
+    document.documentElement.lang = lang;
+    document.getElementById("btn-de").classList.toggle("active", lang === "de");
+    document.getElementById("btn-en").classList.toggle("active", lang === "en");
+    document.querySelectorAll("[data-i18n]").forEach(el => {
+      el.innerHTML = t(el.getAttribute("data-i18n"));
     });
-  }, { threshold: 0.1, rootMargin: "0px 0px -30px 0px" });
-  document.querySelectorAll(".reveal").forEach((el, i) => {
-    el.style.transitionDelay = (i % 6) * 0.06 + "s";
-    revealObserver.observe(el);
-  });
+    document.querySelectorAll("[data-i18n-html]").forEach(el => {
+      el.innerHTML = t(el.getAttribute("data-i18n-html"));
+    });
+    renderSections();
+    initReveal();
+  }
+
+  // ---------- Scroll-Reveal ----------
+  let revealObserver = null;
+  function initReveal() {
+    if (!revealObserver) {
+      revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("in");
+            revealObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1, rootMargin: "0px 0px -30px 0px" });
+    }
+    document.querySelectorAll(".reveal:not(.in)").forEach((el, i) => {
+      el.style.transitionDelay = (i % 6) * 0.06 + "s";
+      revealObserver.observe(el);
+    });
+  }
 
   // ---------- 🎨 Farbwähler (identisch zur Landingpage, gleicher Speicher) ----------
   const PRESETS = ["#EC4899", "#8B5CF6", "#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#06B6D4"];
@@ -409,6 +439,8 @@
       requestAnimationFrame(loop);
     }
   })();
+
+  setLang(lang);
 </script>
 </body>
 </html>
