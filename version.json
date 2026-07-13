@@ -1,0 +1,5 @@
+{
+  "version": "1.7.0",
+  "url": "https://lizziies.github.io/downloader3-landing/#download",
+  "_hinweis": "Bei JEDEM neuen Release: 'version' hier auf die neue Versionsnummer setzen und die Datei ins downloader3-landing-Repo hochladen. Alle laufenden Apps zeigen dann automatisch den Update-Hinweis. 'url' ist die Seite, die der Download-Button im Update-Fenster oeffnet."
+}
