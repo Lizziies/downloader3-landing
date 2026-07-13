@@ -59,11 +59,31 @@
   ]
 }
 </script>
+
+<!-- 🎨 Gespeicherte Akzentfarbe SOFORT anwenden (vor dem ersten Malen),
+     damit es beim Laden nicht kurz "pink aufblitzt und dann wechselt". -->
+<script>
+(function () {
+  try {
+    var raw = localStorage.getItem("dl3_landing_accent");
+    if (raw) {
+      var c = JSON.parse(raw);
+      var root = document.documentElement.style;
+      root.setProperty("--pink", c.base);
+      root.setProperty("--pink-dark", c.dark);
+      root.setProperty("--pink-glow", c.glow);
+      root.setProperty("--pink-glow2", c.glow2);
+    }
+  } catch (e) {}
+})();
+</script>
+
 <style>
   :root {
     --pink: #EC4899;
     --pink-dark: #B9226E;
     --pink-glow: rgba(236, 72, 153, .35);
+    --pink-glow2: rgba(236, 72, 153, .15);
     --bg: #0E0F14;
     --bg2: #14161F;
     --card: #1B1D26;
@@ -71,68 +91,119 @@
     --border: #2A2D3A;
     --text: #F3F4F6;
     --muted: #9CA3AF;
+    --ease: cubic-bezier(.16, 1, .3, 1);
+    --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
   }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
   body {
-    margin: 0; font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+    margin: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Arial, sans-serif;
     background: var(--bg); color: var(--text); line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
   }
   a { color: inherit; }
   .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  ::selection { background: var(--pink-glow2); color: #fff; }
+
+  /* ---------- Scroll reveal (Apple-artig: sanft, gedämpft, kein "Zappeln") ---------- */
+  .reveal {
+    opacity: 0; transform: translateY(28px);
+    transition: opacity .9s var(--ease), transform .9s var(--ease);
+    will-change: opacity, transform;
+  }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+  .reveal.r-scale { transform: translateY(18px) scale(.96); }
+  .reveal.r-scale.in { transform: translateY(0) scale(1); }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, .reveal.in { opacity: 1; transform: none; transition: none; }
+  }
 
   /* ---------- Nav ---------- */
   header.nav {
-    position: sticky; top: 0; z-index: 50;
-    background: rgba(14,15,20,.85); backdrop-filter: blur(10px);
+    position: sticky; top: 0; z-index: 60;
+    background: rgba(14,15,20,.72); backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
     border-bottom: 1px solid var(--border);
+    transition: background .3s var(--ease), border-color .3s var(--ease), box-shadow .3s var(--ease);
   }
+  header.nav.scrolled { box-shadow: 0 10px 30px rgba(0,0,0,.25); }
   .nav-inner {
     display: flex; align-items: center; justify-content: space-between;
     padding: 14px 24px; max-width: 1120px; margin: 0 auto;
+    transition: padding .3s var(--ease);
   }
-  .logo { font-size: 20px; font-weight: 800; color: var(--pink); display: flex; align-items: center; gap: 6px; }
+  header.nav.scrolled .nav-inner { padding: 10px 24px; }
+  .logo {
+    font-size: 20px; font-weight: 800; color: var(--pink); display: flex; align-items: center; gap: 6px;
+    transition: transform .3s var(--ease-spring);
+  }
+  .logo:hover { transform: scale(1.05) rotate(-2deg); }
   .nav-links { display: flex; gap: 28px; font-size: 14px; color: var(--muted); }
+  .nav-links a { position: relative; padding: 4px 0; transition: color .2s var(--ease); }
+  .nav-links a::after {
+    content: ""; position: absolute; left: 0; bottom: -2px; width: 0; height: 2px;
+    background: linear-gradient(90deg, var(--pink), var(--pink-dark)); transition: width .3s var(--ease);
+    border-radius: 2px;
+  }
   .nav-links a:hover { color: var(--text); }
+  .nav-links a:hover::after { width: 100%; }
   .nav-right { display: flex; align-items: center; gap: 14px; }
   .lang-switch button {
     background: transparent; border: 1px solid var(--border); color: var(--muted);
     border-radius: 999px; padding: 5px 12px; font-size: 12px; cursor: pointer;
+    transition: all .2s var(--ease);
   }
-  .lang-switch button.active { border-color: var(--pink); color: var(--pink); }
+  .lang-switch button:hover { border-color: var(--pink); color: var(--pink); }
+  .lang-switch button.active { border-color: var(--pink); color: var(--pink); background: var(--pink-glow2); }
   @media (max-width: 720px) { .nav-links { display: none; } }
 
   /* ---------- Buttons ---------- */
   .btn {
     display: inline-flex; align-items: center; gap: 8px; justify-content: center;
     padding: 13px 26px; border-radius: 12px; font-weight: 700; font-size: 15px;
-    text-decoration: none; cursor: pointer; border: none; transition: transform .12s, box-shadow .12s;
+    text-decoration: none; cursor: pointer; border: none;
+    transition: transform .35s var(--ease-spring), box-shadow .35s var(--ease), filter .2s var(--ease);
+    position: relative; overflow: hidden;
   }
   .btn-primary {
     background: linear-gradient(135deg, var(--pink), var(--pink-dark)); color: #fff;
     box-shadow: 0 8px 24px var(--pink-glow);
   }
-  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 30px var(--pink-glow); }
+  .btn-primary::before {
+    content: ""; position: absolute; inset: 0; border-radius: inherit;
+    background: linear-gradient(135deg, rgba(255,255,255,.35), transparent 60%);
+    opacity: 0; transition: opacity .3s var(--ease);
+  }
+  .btn-primary:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 16px 36px var(--pink-glow); }
+  .btn-primary:hover::before { opacity: 1; }
+  .btn-primary:active { transform: translateY(-1px) scale(.99); }
   .btn-ghost {
     background: transparent; color: var(--text); border: 1px solid var(--border);
   }
-  .btn-ghost:hover { border-color: var(--pink); color: var(--pink); }
+  .btn-ghost:hover { border-color: var(--pink); color: var(--pink); transform: translateY(-2px); }
   .btn-sm { padding: 9px 18px; font-size: 13px; border-radius: 10px; }
 
   /* ---------- Hero ---------- */
-  .hero { text-align: center; padding: 92px 24px 70px; position: relative; overflow: hidden; }
-  .hero::before {
-    content: ""; position: absolute; top: -180px; left: 50%; transform: translateX(-50%);
-    width: 720px; height: 420px; background: radial-gradient(circle, var(--pink-glow), transparent 70%);
-    filter: blur(10px); pointer-events: none;
+  .hero { text-align: center; padding: 110px 24px 90px; position: relative; overflow: hidden; }
+  .hero-orb {
+    position: absolute; border-radius: 50%; filter: blur(60px); pointer-events: none;
+    opacity: .55; transition: transform .6s var(--ease);
   }
+  .hero-orb.o1 { width: 480px; height: 480px; top: -220px; left: 8%; background: radial-gradient(circle, var(--pink-glow), transparent 70%); animation: float1 16s ease-in-out infinite; }
+  .hero-orb.o2 { width: 380px; height: 380px; top: -140px; right: 6%; background: radial-gradient(circle, var(--pink-glow2), transparent 70%); animation: float2 20s ease-in-out infinite; }
+  @keyframes float1 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(30px, 40px); } }
+  @keyframes float2 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-40px, 25px); } }
+
   .eyebrow {
     display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .04em;
-    color: var(--pink); background: rgba(236,72,153,.12); border: 1px solid rgba(236,72,153,.3);
+    color: var(--pink); background: var(--pink-glow2); border: 1px solid var(--pink-glow);
     padding: 5px 14px; border-radius: 999px; margin-bottom: 22px;
   }
-  .hero h1 { font-size: clamp(32px, 5vw, 54px); font-weight: 800; margin: 0 0 18px; line-height: 1.12; position: relative; }
-  .hero h1 .accent { color: var(--pink); }
+  .hero h1 { font-size: clamp(34px, 5.4vw, 58px); font-weight: 800; margin: 0 0 18px; line-height: 1.1; position: relative; letter-spacing: -.01em; }
+  .hero h1 .accent {
+    background: linear-gradient(135deg, var(--pink), var(--pink-dark));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
   .hero p.lead {
     color: var(--muted); font-size: 18px; max-width: 620px; margin: 0 auto 34px; position: relative;
   }
@@ -144,43 +215,78 @@
   .platform-pill {
     background: var(--card); border: 1px solid var(--border); border-radius: 999px;
     padding: 8px 16px; font-size: 13px; color: var(--muted);
+    transition: transform .3s var(--ease-spring), border-color .3s var(--ease), color .3s var(--ease);
   }
+  .platform-pill:hover { transform: translateY(-3px); border-color: var(--pink); color: var(--text); }
+
+  /* ---------- App mockup (Apple-style tilted product card) ---------- */
+  .app-mock {
+    max-width: 760px; margin: 56px auto 0; position: relative; perspective: 1400px;
+  }
+  .app-mock-inner {
+    border-radius: 20px; background: linear-gradient(160deg, var(--card2), var(--card));
+    border: 1px solid var(--border); box-shadow: 0 40px 90px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.02) inset;
+    transform: rotateX(8deg) rotateY(-6deg);
+    transition: transform .25s var(--ease);
+    overflow: hidden;
+  }
+  .app-mock-bar { display: flex; gap: 6px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  .app-mock-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); }
+  .app-mock-body { display: flex; height: 280px; }
+  .app-mock-side { width: 30%; background: rgba(255,255,255,.02); padding: 16px 12px; border-right: 1px solid var(--border); }
+  .app-mock-item { height: 12px; border-radius: 6px; background: rgba(255,255,255,.06); margin-bottom: 12px; }
+  .app-mock-item.active { background: linear-gradient(90deg, var(--pink), var(--pink-dark)); width: 70%; }
+  .app-mock-main { flex: 1; padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+  .app-mock-input { height: 42px; border-radius: 10px; background: rgba(255,255,255,.04); border: 1px solid var(--border); display: flex; align-items: center; padding: 0 14px; font-size: 12px; color: var(--muted); }
+  .app-mock-input span { animation: typeLink 4s steps(30) infinite; white-space: nowrap; overflow: hidden; border-right: 2px solid var(--pink); display: inline-block; }
+  .app-mock-chips { display: flex; gap: 8px; }
+  .app-mock-chip { padding: 6px 14px; border-radius: 999px; border: 1px solid var(--border); font-size: 11px; color: var(--muted); animation: chipPulse 4s ease-in-out infinite; }
+  .app-mock-chip:nth-child(2) { animation-delay: .3s; }
+  .app-mock-chip:nth-child(3) { animation-delay: .6s; }
+  .app-mock-track { height: 10px; border-radius: 999px; background: rgba(255,255,255,.06); overflow: hidden; margin-top: auto; }
+  .app-mock-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--pink), var(--pink-dark)); width: 0%; animation: fillBar 4s ease-in-out infinite; }
+  @media (max-width: 640px) { .app-mock { display: none; } }
 
   /* ---------- Sections ---------- */
-  section { padding: 70px 0; }
+  section { padding: 86px 0; }
   .section-head { text-align: center; max-width: 640px; margin: 0 auto 46px; }
   .section-head .eyebrow { margin-bottom: 14px; }
-  .section-head h2 { font-size: clamp(26px, 3.4vw, 36px); font-weight: 800; margin: 0 0 12px; }
+  .section-head h2 { font-size: clamp(26px, 3.4vw, 38px); font-weight: 800; margin: 0 0 12px; letter-spacing: -.01em; }
   .section-head p { color: var(--muted); font-size: 16px; margin: 0; }
 
   /* ---------- Feature grid ---------- */
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
   .feature-card {
-    background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 26px;
-    transition: border-color .15s, transform .15s;
+    background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 26px;
+    transition: border-color .35s var(--ease), transform .35s var(--ease), box-shadow .35s var(--ease), background .35s var(--ease);
+    position: relative;
   }
-  .feature-card:hover { border-color: var(--pink); transform: translateY(-3px); }
+  .feature-card:hover {
+    border-color: var(--pink-glow); transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(0,0,0,.35), 0 0 0 1px var(--pink-glow2);
+    background: linear-gradient(160deg, var(--card2), var(--card));
+  }
   .feature-icon {
-    width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
-    font-size: 22px; background: rgba(236,72,153,.12); margin-bottom: 16px;
+    width: 46px; height: 46px; border-radius: 13px; display: flex; align-items: center; justify-content: center;
+    font-size: 22px; background: var(--pink-glow2); margin-bottom: 16px;
+    transition: transform .4s var(--ease-spring);
   }
+  .feature-card:hover .feature-icon { transform: scale(1.12) rotate(-4deg); }
   .feature-card h3 { margin: 0 0 8px; font-size: 16px; }
   .feature-card p { margin: 0; color: var(--muted); font-size: 14px; }
   .feature-card .tag {
     display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .03em;
-    color: var(--pink); background: rgba(236,72,153,.12); border-radius: 999px; padding: 2px 8px; margin-left: 8px;
+    color: var(--pink); background: var(--pink-glow2); border-radius: 999px; padding: 2px 8px; margin-left: 8px;
     vertical-align: middle;
   }
 
   /* ---------- Steps ---------- */
   .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; counter-reset: step; position: relative; }
   .step {
-    text-align: center; padding: 20px 16px; position: relative;
-    border-radius: 16px; border: 1px solid transparent; transition: transform .25s ease, border-color .25s ease, background .25s ease;
+    text-align: center; padding: 22px 16px; position: relative;
+    border-radius: 18px; border: 1px solid transparent; transition: transform .35s var(--ease), border-color .35s var(--ease), background .35s var(--ease), box-shadow .35s var(--ease);
   }
-  .step:hover { transform: translateY(-4px); border-color: rgba(236,72,153,.35); background: rgba(236,72,153,.05); }
-  /* Verbindungslinie zwischen den Schritten (nur Desktop) */
-  .steps { position: relative; }
+  .step:hover { transform: translateY(-6px); border-color: var(--pink-glow); background: var(--pink-glow2); box-shadow: 0 20px 40px rgba(0,0,0,.3); }
   @media (min-width: 720px) {
     .step:not(:last-child)::after {
       content: ""; position: absolute; top: 32px; left: calc(50% + 32px); width: calc(100% - 64px);
@@ -192,11 +298,10 @@
     counter-increment: step; width: 40px; height: 40px; border-radius: 50%;
     background: linear-gradient(135deg, var(--pink), var(--pink-dark)); color: #fff; font-weight: 800;
     display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 16px;
-    position: relative; z-index: 1; box-shadow: 0 0 0 6px var(--bg2), 0 6px 18px rgba(236,72,153,.4);
+    position: relative; z-index: 1; box-shadow: 0 0 0 6px var(--bg2), 0 6px 18px var(--pink-glow);
   }
   .step h3 { font-size: 16px; margin: 0 0 8px; }
   .step p { color: var(--muted); font-size: 14px; margin: 0 0 14px; }
-  /* Kleine, rein dekorative Live-Vorschau je Schritt (CSS-Animation) */
   .step-demo {
     height: 34px; border-radius: 8px; background: var(--card); border: 1px solid var(--border);
     display: flex; align-items: center; padding: 0 10px; font-size: 12px; color: var(--muted);
@@ -224,8 +329,26 @@
 
   /* ---------- Pricing teaser ---------- */
   .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
-  .price-card { background: var(--card); border: 2px solid var(--border); border-radius: 18px; padding: 30px 26px; }
-  .price-card.highlight { border-color: var(--pink); background: linear-gradient(180deg, rgba(236,72,153,.08), var(--card) 40%); }
+  .price-card {
+    background: var(--card); border: 2px solid var(--border); border-radius: 20px; padding: 30px 26px;
+    cursor: pointer; position: relative;
+    transition: transform .35s var(--ease), border-color .35s var(--ease), box-shadow .35s var(--ease), background .35s var(--ease);
+  }
+  .price-card:hover { transform: translateY(-6px); box-shadow: 0 20px 44px rgba(0,0,0,.35); border-color: var(--pink-glow); }
+  /* 🖱️ Angeklicktes Angebot: pinker Rahmen wandert mit + sanfter Puls-Glow */
+  .price-card.selected {
+    border-color: var(--pink);
+    background: linear-gradient(180deg, var(--pink-glow2), var(--card) 40%);
+    box-shadow: 0 0 0 3px var(--pink-glow), 0 22px 48px rgba(0,0,0,.4);
+    transform: translateY(-8px) scale(1.02);
+    animation: cardPulse 2.6s ease-in-out infinite;
+  }
+  @keyframes cardPulse {
+    0%, 100% { box-shadow: 0 0 0 3px var(--pink-glow), 0 22px 48px rgba(0,0,0,.4); }
+    50% { box-shadow: 0 0 0 5px var(--pink-glow), 0 0 34px var(--pink-glow), 0 22px 48px rgba(0,0,0,.4); }
+  }
+  .price-card .price { transition: transform .35s var(--ease-spring); }
+  .price-card.selected .price { transform: scale(1.08); }
   .price-card h3 { margin: 0 0 6px; font-size: 18px; }
   .price-card .price { font-size: 30px; font-weight: 800; color: var(--pink); margin: 8px 0 18px; }
   .price-card .price small { font-size: 13px; color: var(--muted); font-weight: 400; }
@@ -233,23 +356,286 @@
   .price-card ul li { padding: 5px 0; }
   .price-card ul li::before { content: "✓ "; color: var(--pink); font-weight: 700; }
 
-  /* ---------- FAQ ---------- */
-  .faq-item { border-bottom: 1px solid var(--border); padding: 20px 0; }
-  .faq-item h3 { margin: 0 0 8px; font-size: 15px; }
-  .faq-item p { margin: 0; color: var(--muted); font-size: 14px; }
+  /* ---------- FAQ (Apple-style accordion) ---------- */
+  .faq-item {
+    border-bottom: 1px solid var(--border); overflow: hidden;
+  }
+  .faq-q {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 20px 4px; cursor: pointer; background: none; border: none; width: 100%; text-align: left;
+    color: var(--text); font-size: 15px; font-weight: 600; font-family: inherit;
+  }
+  .faq-q .icon { flex-shrink: 0; width: 22px; height: 22px; position: relative; transition: transform .4s var(--ease); }
+  .faq-q .icon::before, .faq-q .icon::after {
+    content: ""; position: absolute; background: var(--pink); border-radius: 2px; transition: transform .3s var(--ease), opacity .3s var(--ease);
+  }
+  .faq-q .icon::before { width: 14px; height: 2px; top: 10px; left: 4px; }
+  .faq-q .icon::after { width: 2px; height: 14px; top: 4px; left: 10px; }
+  .faq-item.open .faq-q .icon::after { transform: rotate(90deg); opacity: 0; }
+  .faq-a {
+    max-height: 0; overflow: hidden; transition: max-height .4s var(--ease), padding .4s var(--ease);
+    color: var(--muted); font-size: 14px; padding: 0 4px;
+  }
+  .faq-item.open .faq-a { max-height: 240px; padding: 0 4px 20px; }
+
+  /* ---------- Download CTA ---------- */
+  .download-glow { position: relative; }
+  .download-glow::before {
+    content: ""; position: absolute; top: -80px; left: 50%; transform: translateX(-50%);
+    width: 560px; height: 300px; background: radial-gradient(circle, var(--pink-glow2), transparent 70%);
+    pointer-events: none;
+  }
 
   /* ---------- Footer ---------- */
   footer { border-top: 1px solid var(--border); padding: 40px 24px 30px; text-align: center; color: var(--muted); font-size: 13px; }
   footer .foot-logo { color: var(--pink); font-weight: 800; margin-bottom: 8px; }
   footer .legal { max-width: 640px; margin: 18px auto 0; font-size: 12px; line-height: 1.6; opacity: .8; }
   footer .foot-links { margin-top: 14px; display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; }
+  footer .foot-links a { transition: color .2s var(--ease); }
+  footer .foot-links a:hover { color: var(--pink); }
+
+  /* ---------- Custom-Farbwähler (schwebender Button unten rechts) ---------- */
+  .color-fab {
+    position: fixed; bottom: 22px; right: 22px; z-index: 90;
+    width: 52px; height: 52px; border-radius: 50%; border: none; cursor: pointer;
+    background: linear-gradient(135deg, var(--pink), var(--pink-dark)); color: #fff; font-size: 20px;
+    box-shadow: 0 10px 26px var(--pink-glow), 0 0 0 1px rgba(255,255,255,.08) inset;
+    transition: transform .35s var(--ease-spring);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .color-fab:hover { transform: scale(1.1) rotate(12deg); }
+  .color-panel {
+    position: fixed; bottom: 84px; right: 22px; z-index: 90;
+    background: var(--card2); border: 1px solid var(--border); border-radius: 16px;
+    padding: 16px; width: 220px; box-shadow: 0 20px 50px rgba(0,0,0,.5);
+    opacity: 0; transform: translateY(12px) scale(.96); pointer-events: none;
+    transition: opacity .25s var(--ease), transform .25s var(--ease);
+  }
+  .color-panel.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+  .color-panel-title { font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: .04em; }
+  .swatch-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .swatch {
+    width: 26px; height: 26px; border-radius: 50%; cursor: pointer; border: 2px solid transparent;
+    transition: transform .2s var(--ease-spring), border-color .2s var(--ease);
+  }
+  .swatch:hover { transform: scale(1.15); }
+  .swatch.active { border-color: #fff; }
+  .color-custom-row { display: flex; align-items: center; gap: 8px; }
+  .color-custom-row input[type="color"] {
+    width: 34px; height: 34px; border: none; border-radius: 8px; padding: 0; background: none; cursor: pointer;
+  }
+  .color-reset {
+    background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 8px;
+    padding: 6px 10px; font-size: 12px; cursor: pointer; transition: all .2s var(--ease);
+  }
+  .color-reset:hover { border-color: var(--pink); color: var(--pink); }
+
+  /* ---------- Scroll-Fortschrittsbalken ganz oben ---------- */
+  .scroll-progress {
+    position: fixed; top: 0; left: 0; height: 3px; width: 0%;
+    background: linear-gradient(90deg, var(--pink), var(--pink-dark));
+    z-index: 100; box-shadow: 0 0 12px var(--pink-glow);
+    transition: width .1s linear;
+  }
+
+  /* ---------- Schwebende Herzchen im Hero (Canvas) ---------- */
+  .hearts-canvas {
+    position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  }
+  .hero .wrap { position: relative; z-index: 1; }
+
+  /* ---------- Schimmernder Farbverlauf auf dem Akzent-Text ---------- */
+  .hero h1 .accent {
+    background: linear-gradient(120deg, var(--pink), var(--pink-dark), var(--pink), var(--pink-dark));
+    background-size: 300% 100%;
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: shimmer 6s ease-in-out infinite;
+  }
+  @keyframes shimmer { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+  /* ---------- Zahlen-Statistik-Reihe (Count-up beim Scrollen) ---------- */
+  .stats-row {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px; max-width: 780px; margin: 56px auto 0; position: relative;
+  }
+  .stat {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 20px 14px; text-align: center;
+    transition: transform .35s var(--ease), border-color .35s var(--ease);
+  }
+  .stat:hover { transform: translateY(-4px); border-color: var(--pink-glow); }
+  .stat .n {
+    font-size: clamp(26px, 3.4vw, 36px); font-weight: 800;
+    background: linear-gradient(135deg, var(--pink), var(--pink-dark));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat .l { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  /* ---------- Endlos-Laufband mit Plattform-Pills ---------- */
+  .marquee {
+    overflow: hidden; position: relative; margin-top: 44px;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  }
+  .marquee-track {
+    display: flex; gap: 12px; width: max-content;
+    animation: marquee 26s linear infinite;
+  }
+  .marquee:hover .marquee-track { animation-play-state: paused; }
+  @keyframes marquee { to { transform: translateX(-50%); } }
+  @media (prefers-reduced-motion: reduce) { .marquee-track { animation: none; } }
+
+  /* ---------- Spotlight-Effekt auf Feature-Karten (folgt der Maus) ---------- */
+  .feature-card { overflow: hidden; }
+  .feature-card::before {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 50%), var(--pink-glow2), transparent 65%);
+    opacity: 0; transition: opacity .35s var(--ease);
+  }
+  .feature-card:hover::before { opacity: 1; }
+  .feature-card > * { position: relative; }
+
+  /* ---------- Zurück-nach-oben-Button ---------- */
+  .backtop {
+    position: fixed; bottom: 22px; right: 86px; z-index: 90;
+    width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border);
+    background: rgba(27,29,38,.85); backdrop-filter: blur(10px); color: var(--muted);
+    font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    opacity: 0; transform: translateY(14px) scale(.9); pointer-events: none;
+    transition: all .35s var(--ease-spring);
+  }
+  .backtop.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+  .backtop:hover { border-color: var(--pink); color: var(--pink); transform: translateY(-3px) scale(1.05); }
+
+  /* ---------- Mobiles Menü (Hamburger) ---------- */
+  .nav-burger {
+    display: none; background: none; border: none; cursor: pointer; padding: 8px;
+    flex-direction: column; gap: 5px;
+  }
+  .nav-burger span {
+    display: block; width: 22px; height: 2px; background: var(--text); border-radius: 2px;
+    transition: transform .3s var(--ease), opacity .3s var(--ease);
+  }
+  .nav-burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .nav-burger.open span:nth-child(2) { opacity: 0; }
+  .nav-burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  .mobile-menu {
+    display: none; flex-direction: column; gap: 4px; padding: 8px 24px 16px;
+    border-top: 1px solid var(--border);
+    background: rgba(14,15,20,.95); backdrop-filter: blur(16px);
+  }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a {
+    padding: 12px 4px; font-size: 15px; color: var(--muted); text-decoration: none;
+    border-bottom: 1px solid rgba(255,255,255,.04); transition: color .2s var(--ease), padding-left .2s var(--ease);
+  }
+  .mobile-menu a:hover { color: var(--pink); padding-left: 10px; }
+  @media (max-width: 720px) {
+    .nav-burger { display: flex; }
+    .hero { padding-top: 70px; }
+    .backtop { right: 22px; bottom: 86px; }
+  }
+
+  /* ---------- Cookie-/Datenschutz-Hinweis ---------- */
+  .cookie-banner {
+    position: fixed; left: 50%; bottom: 18px; transform: translate(-50%, 140%);
+    z-index: 95; width: min(560px, calc(100vw - 32px));
+    background: var(--card2); border: 1px solid var(--border); border-radius: 16px;
+    padding: 16px 18px; box-shadow: 0 20px 50px rgba(0,0,0,.55);
+    transition: transform .5s var(--ease-spring);
+    font-size: 13px; color: var(--muted); line-height: 1.55;
+  }
+  .cookie-banner.show { transform: translate(-50%, 0); }
+  .cookie-banner b { color: var(--text); }
+  .cookie-actions { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+  .cookie-btn {
+    padding: 8px 18px; border-radius: 10px; font-size: 13px; font-weight: 700;
+    cursor: pointer; border: none; transition: transform .25s var(--ease-spring);
+  }
+  .cookie-btn:hover { transform: translateY(-2px); }
+  .cookie-btn.ok { background: linear-gradient(135deg, var(--pink), var(--pink-dark)); color: #fff; }
+  .cookie-btn.more { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .cookie-btn.more:hover { border-color: var(--pink); color: var(--pink); }
+
+  /* ---------- 💥 Herzchen-Burst bei jedem Klick (in der gewählten Akzentfarbe) ---------- */
+  .burst-heart {
+    position: fixed; z-index: 200; pointer-events: none; line-height: 0;
+    animation: burstFly .8s cubic-bezier(.16,1,.3,1) forwards;
+    filter: drop-shadow(0 0 6px var(--pink-glow));
+  }
+  .burst-heart svg { display: block; }
+  @keyframes burstFly {
+    0% { transform: translate(0,0) scale(.5) rotate(0deg); opacity: 1; }
+    100% { transform: translate(var(--bx), var(--by)) scale(1.2) rotate(var(--br)); opacity: 0; }
+  }
+
+  /* ---------- ✨ Wort-für-Wort-Eintritt des Hero-Titels (Apple-Style) ---------- */
+  .hero h1 .w {
+    display: inline-block; opacity: 0;
+    transform: translateY(26px); filter: blur(8px);
+    animation: wordIn .8s var(--ease) forwards;
+    animation-delay: calc(var(--wi) * .075s + .1s);
+  }
+  @keyframes wordIn {
+    to { opacity: 1; transform: translateY(0); filter: blur(0); }
+  }
+  .hero h1 .w-acc {
+    background: linear-gradient(120deg, var(--pink), var(--pink-dark), var(--pink));
+    background-size: 300% 100%;
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: wordIn .8s var(--ease) forwards, shimmer 6s ease-in-out infinite;
+    animation-delay: calc(var(--wi) * .075s + .1s), 0s;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero h1 .w { opacity: 1; transform: none; filter: none; animation: none; }
+    .hero h1 .w-acc { opacity: 1; transform: none; filter: none; animation: shimmer 6s ease-in-out infinite; }
+  }
+
+  /* ---------- 🔦 Weicher Leucht-Cursor (folgt der Maus, nur Desktop) ---------- */
+  .cursor-glow {
+    position: fixed; top: 0; left: 0; width: 380px; height: 380px;
+    border-radius: 50%; pointer-events: none; z-index: 3;
+    background: radial-gradient(circle, var(--pink-glow2), transparent 62%);
+    transform: translate(-50%, -50%); opacity: 0;
+    transition: opacity .5s var(--ease);
+    mix-blend-mode: screen;
+  }
+  body:hover .cursor-glow { opacity: .8; }
+  @media (hover: none), (prefers-reduced-motion: reduce) { .cursor-glow { display: none; } }
+
+  /* ---------- 3D-Tilt auch auf Preis-Karten ---------- */
+  #pricing-grid { perspective: 1100px; }
+  .price-card { transform-style: preserve-3d; }
+
+  /* ---------- 3D-Tilt auf Feature-Karten ---------- */
+  #feature-grid { perspective: 1100px; }
+  .feature-card { transform-style: preserve-3d; }
+  .feature-card.tilting { transition: border-color .35s var(--ease), box-shadow .35s var(--ease), background .35s var(--ease); }
+
+  /* ---------- Klickbare Pills & Stats (zeigen Hand-Cursor + Feedback) ---------- */
+  .platform-pill, .stat { cursor: pointer; }
+  .stat:active, .platform-pill:active { transform: scale(.95); }
+
+  /* ---------- Sanftes Wackeln des Logos-Herzens ---------- */
+  @keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    10% { transform: scale(1.18); }
+    20% { transform: scale(1); }
+    30% { transform: scale(1.12); }
+    40% { transform: scale(1); }
+  }
+  .logo .beat { display: inline-block; animation: heartbeat 2.4s ease-in-out infinite; }
 </style>
 </head>
 <body>
 
-<header class="nav">
+<div class="scroll-progress" id="scroll-progress"></div>
+<div class="cursor-glow" id="cursor-glow"></div>
+
+<header class="nav" id="site-nav">
   <div class="nav-inner">
-    <div class="logo">💜 <span data-i18n="brand">Downloader&lt;3</span></div>
+    <div class="logo"><span class="beat">💜</span> <span data-i18n="brand">Downloader&lt;3</span></div>
     <nav class="nav-links">
       <a href="#features" data-i18n="nav_features">Features</a>
       <a href="#how" data-i18n="nav_how">So geht's</a>
@@ -262,36 +648,77 @@
         <button id="btn-en" onclick="setLang('en')">EN</button>
       </div>
       <a id="nav-download-btn" class="btn btn-primary btn-sm" href="#download" data-i18n="nav_download">Download</a>
+      <button class="nav-burger" id="nav-burger" aria-label="Menü">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </div>
+  <nav class="mobile-menu" id="mobile-menu">
+    <a href="#features" data-i18n="nav_features">Features</a>
+    <a href="#how" data-i18n="nav_how">So geht's</a>
+    <a href="#pricing" data-i18n="nav_pricing">Premium</a>
+    <a href="#faq" data-i18n="nav_faq">FAQ</a>
+    <a href="#download" data-i18n="nav_download">Download</a>
+  </nav>
 </header>
 
 <section class="hero">
+  <div class="hero-orb o1" id="orb1"></div>
+  <div class="hero-orb o2" id="orb2"></div>
+  <canvas class="hearts-canvas" id="hearts-canvas"></canvas>
   <div class="wrap">
-    <span class="eyebrow" data-i18n="eyebrow">💜 KOSTENLOS FÜR WINDOWS</span>
-    <h1 data-i18n-html="hero_title">Videos &amp; Musik laden — <span class="accent">in einer App.</span></h1>
-    <p class="lead" data-i18n="hero_lead">
+    <span class="eyebrow reveal" data-i18n="eyebrow">💜 KOSTENLOS FÜR WINDOWS</span>
+    <h1 class="reveal" data-i18n-html="hero_title">Videos &amp; Musik laden — <span class="accent">in einer App.</span></h1>
+    <p class="lead reveal" data-i18n="hero_lead">
       YouTube, TikTok, Instagram, Facebook und fast jede Webseite — als MP4, MP3, WAV
       und mehr. Bis zu 4K, mit KI-Modus, Untertitel-Übersetzung und einem Design, das dir gehört.
     </p>
-    <div class="hero-ctas">
+    <div class="hero-ctas reveal">
       <a id="hero-download-btn" href="#download" class="btn btn-primary" data-i18n="hero_cta_primary">⬇ Jetzt kostenlos herunterladen</a>
       <a href="#features" class="btn btn-ghost" data-i18n="hero_cta_secondary">Was kann die App?</a>
     </div>
-    <p class="hero-note" data-i18n="hero_note">Für Windows 10/11 · Kein Konto-Zwang zum Ausprobieren nötig* · Kostenlose Nutzung dauerhaft möglich</p>
-    <div class="platform-row">
-      <span class="platform-pill">▶️ YouTube</span>
-      <span class="platform-pill">🎵 TikTok</span>
-      <span class="platform-pill">📷 Instagram</span>
-      <span class="platform-pill">📘 Facebook</span>
-      <span class="platform-pill">🌐 <span data-i18n="platform_web">Web-Browser (Premium)</span></span>
+    <p class="hero-note reveal" data-i18n="hero_note">Für Windows 10/11 · Kein Konto-Zwang zum Ausprobieren nötig* · Kostenlose Nutzung dauerhaft möglich</p>
+    <div class="marquee reveal" aria-hidden="true">
+      <div class="marquee-track" id="marquee-track"></div>
+    </div>
+
+    <div class="stats-row reveal">
+      <div class="stat"><div class="n" data-count="6" data-suffix="+">0</div><div class="l" data-i18n="stat_platforms">Plattformen</div></div>
+      <div class="stat"><div class="n" data-count="11" data-suffix="+">0</div><div class="l" data-i18n="stat_formats">Formate</div></div>
+      <div class="stat"><div class="n" data-count="4" data-suffix="K">0</div><div class="l" data-i18n="stat_res">Max. Auflösung</div></div>
+      <div class="stat"><div class="n" data-count="10" data-suffix="+">0</div><div class="l" data-i18n="stat_langs">Untertitel-Sprachen</div></div>
+    </div>
+
+    <div class="app-mock reveal r-scale" id="app-mock">
+      <div class="app-mock-inner" id="app-mock-inner">
+        <div class="app-mock-bar">
+          <div class="app-mock-dot"></div><div class="app-mock-dot"></div><div class="app-mock-dot"></div>
+        </div>
+        <div class="app-mock-body">
+          <div class="app-mock-side">
+            <div class="app-mock-item active"></div>
+            <div class="app-mock-item" style="width:55%"></div>
+            <div class="app-mock-item" style="width:65%"></div>
+            <div class="app-mock-item" style="width:40%"></div>
+          </div>
+          <div class="app-mock-main">
+            <div class="app-mock-input"><span>youtube.com/watch?v=…</span></div>
+            <div class="app-mock-chips">
+              <div class="app-mock-chip">MP4</div>
+              <div class="app-mock-chip">MP3</div>
+              <div class="app-mock-chip">4K</div>
+            </div>
+            <div class="app-mock-track"><div class="app-mock-fill"></div></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
 <section id="features">
   <div class="wrap">
-    <div class="section-head">
+    <div class="section-head reveal">
       <span class="eyebrow" data-i18n="features_eyebrow">FEATURES</span>
       <h2 data-i18n="features_title">Alles drin, was ein Downloader können sollte</h2>
       <p data-i18n="features_lead">Von schnellen MP4-Downloads bis zu KI-gestützten Extras — hier ist die volle Liste.</p>
@@ -302,7 +729,7 @@
 
 <section id="how" style="background: var(--bg2);">
   <div class="wrap">
-    <div class="section-head">
+    <div class="section-head reveal">
       <span class="eyebrow" data-i18n="how_eyebrow">SO EINFACH GEHT'S</span>
       <h2 data-i18n="how_title">In drei Schritten zum fertigen Download</h2>
     </div>
@@ -312,13 +739,13 @@
 
 <section id="pricing">
   <div class="wrap">
-    <div class="section-head">
+    <div class="section-head reveal">
       <span class="eyebrow" data-i18n="pricing_eyebrow">GRATIS ODER PREMIUM</span>
       <h2 data-i18n="pricing_title">Kostenlos startklar — Premium für alles andere</h2>
       <p data-i18n="pricing_lead">Kein Abo-Zwang: Premium lässt sich zeitlich begrenzt oder dauerhaft kaufen.</p>
     </div>
     <div class="pricing-grid" id="pricing-grid"></div>
-    <div style="text-align:center; margin-top:28px;">
+    <div style="text-align:center; margin-top:28px;" class="reveal">
       <a href="https://lizziies.github.io/downloader3-checkout/" class="btn btn-primary" data-i18n="pricing_cta">★ Premium ansehen</a>
     </div>
   </div>
@@ -326,7 +753,7 @@
 
 <section id="faq" style="background: var(--bg2);">
   <div class="wrap" style="max-width: 760px;">
-    <div class="section-head">
+    <div class="section-head reveal">
       <span class="eyebrow" data-i18n="faq_eyebrow">FAQ</span>
       <h2 data-i18n="faq_title">Häufige Fragen</h2>
     </div>
@@ -334,17 +761,17 @@
   </div>
 </section>
 
-<section id="download">
+<section id="download" class="download-glow">
   <div class="wrap" style="text-align:center;">
-    <span class="eyebrow" data-i18n="dl_eyebrow">DOWNLOAD</span>
-    <h2 style="font-size: clamp(24px,3vw,32px); font-weight:800; margin: 10px 0 14px;" data-i18n="dl_title">Bereit? Lad dir Downloader&lt;3 jetzt herunter.</h2>
-    <p style="color:var(--muted); max-width:520px; margin: 0 auto 28px;" data-i18n="dl_lead">
+    <span class="eyebrow reveal" data-i18n="dl_eyebrow">DOWNLOAD</span>
+    <h2 class="reveal" style="font-size: clamp(24px,3vw,32px); font-weight:800; margin: 10px 0 14px;" data-i18n="dl_title">Bereit? Lad dir Downloader&lt;3 jetzt herunter.</h2>
+    <p class="reveal" style="color:var(--muted); max-width:520px; margin: 0 auto 28px;" data-i18n="dl_lead">
       Kostenlos, in wenigen Sekunden startklar. Windows 10/11.
     </p>
-    <a id="main-download-btn" href="./Downloader3.exe" class="btn btn-primary" style="font-size:17px; padding:16px 34px;" data-i18n="dl_cta">
+    <a id="main-download-btn" href="./Downloader3.exe" class="btn btn-primary reveal" style="font-size:17px; padding:16px 34px;" data-i18n="dl_cta">
       ⬇ Downloader&lt;3.exe herunterladen
     </a>
-    <p class="hero-note" style="margin-top:16px;" data-i18n="dl_hint">
+    <p class="hero-note reveal" style="margin-top:16px;" data-i18n="dl_hint">
       *Für Premium-Funktionen ist ein kostenloses Konto in der App nötig.
     </p>
   </div>
@@ -357,6 +784,7 @@
     <a href="#pricing" data-i18n="nav_pricing">Premium</a>
     <a href="https://lizziies.github.io/downloader3-checkout/" data-i18n="nav_pricing2">Premium kaufen</a>
     <a href="#faq" data-i18n="nav_faq">FAQ</a>
+    <a href="./datenschutz.html" data-i18n="nav_privacy">Datenschutz</a>
   </div>
   <p class="legal" data-i18n="legal_text">
     Downloader&lt;3 ist ein privates Hobby-Projekt. Bitte nutze die App nur für eigene
@@ -366,6 +794,30 @@
   </p>
   <p style="margin-top:14px; opacity:.7;">Made by Lisa (Lizziie) &amp; Felix 💜</p>
 </footer>
+
+<!-- ⬆️ Zurück nach oben -->
+<button class="backtop" id="backtop" aria-label="Nach oben">↑</button>
+
+<!-- 🍪 Datenschutz-Hinweis (die Seite selbst nutzt KEINE Tracking-Cookies,
+     nur lokal gespeicherte Einstellungen wie Sprache & Akzentfarbe) -->
+<div class="cookie-banner" id="cookie-banner">
+  <span data-i18n="cookie_text"><b>🍪 Kurz &amp; ehrlich:</b> Diese Seite nutzt keine Tracking-Cookies und keine Analyse-Tools. Nur deine Sprach- und Farbwahl wird lokal in deinem Browser gespeichert (localStorage) — sie verlässt dein Gerät nie.</span>
+  <div class="cookie-actions">
+    <button class="cookie-btn ok" id="cookie-ok" data-i18n="cookie_ok">Alles klar 💜</button>
+    <a class="cookie-btn more" href="./datenschutz.html" data-i18n="cookie_more">Mehr erfahren</a>
+  </div>
+</div>
+
+<!-- 🎨 Schwebender Farbwähler — eigene Akzentfarbe statt fest verdrahtetem Pink -->
+<button class="color-fab" id="color-fab" title="Farbe anpassen" aria-label="Farbe anpassen">🎨</button>
+<div class="color-panel" id="color-panel">
+  <div class="color-panel-title" data-i18n="color_title">Akzentfarbe</div>
+  <div class="swatch-row" id="swatch-row"></div>
+  <div class="color-custom-row">
+    <input type="color" id="color-custom" value="#EC4899">
+    <button class="color-reset" id="color-reset" data-i18n="color_reset">Zurücksetzen</button>
+  </div>
+</div>
 
 <script>
   const I18N = {
@@ -377,6 +829,17 @@
       nav_pricing2: "Premium kaufen",
       nav_faq: "FAQ",
       nav_download: "Download",
+      color_title: "Akzentfarbe",
+      color_reset: "Zurücksetzen",
+      nav_imprint: "Impressum",
+      nav_privacy: "Datenschutz",
+      stat_platforms: "Plattformen",
+      stat_formats: "Formate",
+      stat_res: "Max. Auflösung",
+      stat_langs: "Untertitel-Sprachen",
+      cookie_text: "<b>🍪 Kurz &amp; ehrlich:</b> Diese Seite nutzt keine Tracking-Cookies und keine Analyse-Tools. Nur deine Sprach- und Farbwahl wird lokal in deinem Browser gespeichert (localStorage) — sie verlässt dein Gerät nie.",
+      cookie_ok: "Alles klar 💜",
+      cookie_more: "Mehr erfahren",
       eyebrow: "💜 KOSTENLOSER YOUTUBE, TIKTOK &amp; INSTAGRAM DOWNLOADER",
       hero_title: 'Kostenlos YouTube, TikTok &amp; Instagram <span class="accent">Videos herunterladen.</span>',
       hero_lead: "Free YouTube-, TikTok-, Instagram- und Facebook-Downloader — als MP4, MP3, WAV und mehr. Bis zu 4K, mit KI-Modus, Untertitel-Übersetzung und einem Design, das dir gehört. Funktioniert weltweit.",
@@ -450,6 +913,17 @@
       nav_pricing2: "Buy Premium",
       nav_faq: "FAQ",
       nav_download: "Download",
+      color_title: "Accent color",
+      color_reset: "Reset",
+      nav_imprint: "Imprint",
+      nav_privacy: "Privacy",
+      stat_platforms: "Platforms",
+      stat_formats: "Formats",
+      stat_res: "Max. resolution",
+      stat_langs: "Subtitle languages",
+      cookie_text: "<b>🍪 Short &amp; honest:</b> This site uses no tracking cookies and no analytics tools. Only your language and color choice are stored locally in your browser (localStorage) — they never leave your device.",
+      cookie_ok: "Got it 💜",
+      cookie_more: "Learn more",
       eyebrow: "💜 FREE YOUTUBE, TIKTOK &amp; INSTAGRAM DOWNLOADER",
       hero_title: 'Free YouTube, TikTok &amp; Instagram <span class="accent">video downloader.</span>',
       hero_lead: "Download videos & music from YouTube, TikTok, Instagram, Facebook and almost any website — as MP4, MP3, WAV and more. Up to 4K, with AI mode, subtitle translation, and a design that's truly yours. Works worldwide.",
@@ -524,7 +998,7 @@
   function renderFeatures() {
     const grid = document.getElementById("feature-grid");
     grid.innerHTML = t("features").map(([icon, title, desc]) => `
-      <div class="feature-card">
+      <div class="feature-card reveal">
         <div class="feature-icon">${icon}</div>
         <h3>${title}</h3>
         <p>${desc}</p>
@@ -541,7 +1015,7 @@
   function renderSteps() {
     const grid = document.getElementById("steps-grid");
     grid.innerHTML = t("steps").map(([title, desc], i) => `
-      <div class="step">
+      <div class="step reveal">
         <div class="num"></div>
         <h3>${title}</h3>
         <p>${desc}</p>
@@ -552,23 +1026,40 @@
 
   function renderPricing() {
     const grid = document.getElementById("pricing-grid");
-    grid.innerHTML = t("pricing").map(([name, price, unit, perks, highlight]) => `
-      <div class="price-card${highlight ? " highlight" : ""}">
+    grid.innerHTML = t("pricing").map(([name, price, unit, perks, highlight], i) => `
+      <div class="price-card reveal${highlight ? " selected" : ""}" data-idx="${i}">
         <h3>${name}</h3>
         <div class="price">${price} <small>${unit}</small></div>
         <ul>${perks.map(p => `<li>${p}</li>`).join("")}</ul>
       </div>
     `).join("");
+    // 🖱️ Angebot anklicken → der pinke Rahmen wandert zu genau dieser Karte
+    grid.querySelectorAll(".price-card").forEach(card => {
+      card.addEventListener("click", () => {
+        grid.querySelectorAll(".price-card").forEach(c => {
+          c.classList.toggle("selected", c === card);
+          c.style.transform = "";  // evtl. Tilt-Rest entfernen
+        });
+      });
+    });
   }
 
   function renderFaq() {
     const list = document.getElementById("faq-list");
-    list.innerHTML = t("faq").map(([q, a]) => `
-      <div class="faq-item">
-        <h3>${q}</h3>
-        <p>${a}</p>
+    list.innerHTML = t("faq").map(([q, a], i) => `
+      <div class="faq-item reveal" data-i="${i}">
+        <button class="faq-q" type="button"><span>${q}</span><span class="icon"></span></button>
+        <div class="faq-a"><p>${a}</p></div>
       </div>
     `).join("");
+    list.querySelectorAll(".faq-q").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const item = btn.closest(".faq-item");
+        const wasOpen = item.classList.contains("open");
+        list.querySelectorAll(".faq-item.open").forEach(o => o.classList.remove("open"));
+        if (!wasOpen) item.classList.add("open");
+      });
+    });
   }
 
   function setLang(newLang) {
@@ -587,8 +1078,448 @@
     renderSteps();
     renderPricing();
     renderFaq();
+    initReveal();
+    staggerTitle();
   }
 
+  // ---------- ✨ Hero-Titel Wort für Wort einblenden (Apple-Style) ----------
+  function staggerTitle() {
+    const h1 = document.querySelector(".hero h1");
+    if (!h1) return;
+    let wi = 0;
+    function wrapWords(node, acc) {
+      // Text in einzelne Wörter zerlegen, jedes bekommt seine eigene,
+      // leicht versetzte Einblende-Animation (translateY + Blur).
+      const words = node.textContent.split(/\s+/).filter(Boolean);
+      const frag = document.createDocumentFragment();
+      words.forEach((word, j) => {
+        const s = document.createElement("span");
+        s.className = "w" + (acc ? " w-acc" : "");
+        s.style.setProperty("--wi", wi++);
+        s.textContent = word;
+        frag.appendChild(s);
+        if (j < words.length - 1) frag.appendChild(document.createTextNode(" "));
+      });
+      return frag;
+    }
+    [...h1.childNodes].forEach(node => {
+      if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+        h1.replaceChild(wrapWords(node, false), node);
+      } else if (node.nodeType === Node.ELEMENT_NODE
+                 && node.classList.contains("accent")) {
+        const frag = wrapWords(node, true);
+        node.textContent = "";
+        node.appendChild(frag);
+      }
+    });
+  }
+
+  // ---------- Scroll-Reveal (Apple-artig: sanftes Einblenden beim Scrollen) ----------
+  let revealObserver = null;
+  function initReveal() {
+    if (!revealObserver) {
+      revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("in");
+            revealObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+    }
+    document.querySelectorAll(".reveal:not(.in)").forEach((el, i) => {
+      // Leichtes, gestaffeltes Timing innerhalb derselben Sektion — wirkt
+      // organischer als wenn alles gleichzeitig aufpoppt.
+      el.style.transitionDelay = (i % 6) * 0.06 + "s";
+      revealObserver.observe(el);
+    });
+  }
+  initReveal();
+
+  // ---------- Sticky-Nav: dezenter Schatten & Kompression beim Scrollen ----------
+  const navEl = document.getElementById("site-nav");
+  window.addEventListener("scroll", () => {
+    navEl.classList.toggle("scrolled", window.scrollY > 12);
+  }, { passive: true });
+
+  // ---------- Hero: dezenter Parallax-Effekt bei Mausbewegung (Apple-artig) ----------
+  const orb1 = document.getElementById("orb1");
+  const orb2 = document.getElementById("orb2");
+  const mockInner = document.getElementById("app-mock-inner");
+  const mock = document.getElementById("app-mock");
+  document.querySelector(".hero").addEventListener("mousemove", (e) => {
+    const w = window.innerWidth, h = window.innerHeight;
+    const x = (e.clientX / w - 0.5);
+    const y = (e.clientY / h - 0.5);
+    orb1.style.transform = `translate(${x * 30}px, ${y * 20}px)`;
+    orb2.style.transform = `translate(${x * -34}px, ${y * -18}px)`;
+    if (mockInner) {
+      mockInner.style.transform = `rotateX(${8 - y * 10}deg) rotateY(${-6 + x * 14}deg)`;
+    }
+  });
+  document.querySelector(".hero").addEventListener("mouseleave", () => {
+    if (mockInner) mockInner.style.transform = "rotateX(8deg) rotateY(-6deg)";
+  });
+
+  // ---------- 🎨 Custom-Farbwähler ----------
+  const PRESETS = ["#EC4899", "#8B5CF6", "#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#06B6D4"];
+
+  function hexToRgb(hex) {
+    const m = hex.replace("#", "");
+    return {
+      r: parseInt(m.substring(0, 2), 16),
+      g: parseInt(m.substring(2, 4), 16),
+      b: parseInt(m.substring(4, 6), 16),
+    };
+  }
+  function darken(hex, amt) {
+    const { r, g, b } = hexToRgb(hex);
+    const f = (v) => Math.max(0, Math.round(v * (1 - amt)));
+    return "#" + [f(r), f(g), f(b)].map(v => v.toString(16).padStart(2, "0")).join("");
+  }
+  function rgba(hex, a) {
+    const { r, g, b } = hexToRgb(hex);
+    return `rgba(${r}, ${g}, ${b}, ${a})`;
+  }
+
+  function applyAccent(hex, save) {
+    const root = document.documentElement.style;
+    root.setProperty("--pink", hex);
+    root.setProperty("--pink-dark", darken(hex, 0.28));
+    root.setProperty("--pink-glow", rgba(hex, 0.35));
+    root.setProperty("--pink-glow2", rgba(hex, 0.14));
+    document.querySelectorAll(".swatch").forEach(s => {
+      s.classList.toggle("active", s.dataset.hex.toLowerCase() === hex.toLowerCase());
+    });
+    document.getElementById("color-custom").value = hex;
+    if (save) {
+      localStorage.setItem("dl3_landing_accent", JSON.stringify({
+        base: hex, dark: darken(hex, 0.28), glow: rgba(hex, 0.35), glow2: rgba(hex, 0.14),
+      }));
+    }
+  }
+
+  function buildSwatches() {
+    const row = document.getElementById("swatch-row");
+    row.innerHTML = PRESETS.map(hex =>
+      `<span class="swatch" data-hex="${hex}" style="background:${hex}"></span>`
+    ).join("");
+    row.querySelectorAll(".swatch").forEach(sw => {
+      sw.addEventListener("click", () => applyAccent(sw.dataset.hex, true));
+    });
+  }
+  buildSwatches();
+
+  // Beim Laden gespeicherte Farbe in die UI übernehmen (CSS-Variable ist
+  // durch das Inline-Skript im <head> schon gesetzt — hier nur Swatches/
+  // Farbfeld synchronisieren).
+  (function syncSavedAccent() {
+    try {
+      const raw = localStorage.getItem("dl3_landing_accent");
+      if (raw) {
+        const c = JSON.parse(raw);
+        document.querySelectorAll(".swatch").forEach(s => {
+          s.classList.toggle("active", s.dataset.hex.toLowerCase() === c.base.toLowerCase());
+        });
+        document.getElementById("color-custom").value = c.base;
+      } else {
+        document.querySelector('.swatch[data-hex="#EC4899"]').classList.add("active");
+      }
+    } catch (e) {}
+  })();
+
+  document.getElementById("color-custom").addEventListener("input", (e) => {
+    applyAccent(e.target.value, true);
+  });
+  document.getElementById("color-reset").addEventListener("click", () => {
+    localStorage.removeItem("dl3_landing_accent");
+    applyAccent("#EC4899", false);
+  });
+
+  const fab = document.getElementById("color-fab");
+  const panel = document.getElementById("color-panel");
+  fab.addEventListener("click", (e) => {
+    e.stopPropagation();
+    panel.classList.toggle("open");
+  });
+  document.addEventListener("click", (e) => {
+    if (!panel.contains(e.target) && e.target !== fab) panel.classList.remove("open");
+  });
+
+  // ---------- Endlos-Laufband mit Plattform-Pills ----------
+  (function buildMarquee() {
+    const PILLS = ["▶️ YouTube", "🎵 TikTok", "📷 Instagram", "📘 Facebook",
+                   "🎧 SoundCloud", "🎮 Discord", "🌐 Web"];
+    const track = document.getElementById("marquee-track");
+    // Doppelt einfügen → nahtlose Endlos-Schleife (translateX(-50%))
+    track.innerHTML = [...PILLS, ...PILLS].map(p =>
+      `<span class="platform-pill">${p}</span>`).join("");
+  })();
+
+  // ---------- Scroll-Fortschrittsbalken ----------
+  const progressBar = document.getElementById("scroll-progress");
+  const backtopBtn = document.getElementById("backtop");
+  window.addEventListener("scroll", () => {
+    const h = document.documentElement;
+    const max = h.scrollHeight - h.clientHeight;
+    progressBar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + "%";
+    backtopBtn.classList.toggle("show", h.scrollTop > 600);
+  }, { passive: true });
+  backtopBtn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+
+  // ---------- Mobiles Menü ----------
+  const burger = document.getElementById("nav-burger");
+  const mobileMenu = document.getElementById("mobile-menu");
+  burger.addEventListener("click", () => {
+    burger.classList.toggle("open");
+    mobileMenu.classList.toggle("open");
+  });
+  mobileMenu.querySelectorAll("a").forEach(a => a.addEventListener("click", () => {
+    burger.classList.remove("open");
+    mobileMenu.classList.remove("open");
+  }));
+
+  // ---------- Zahlen-Count-up beim Scrollen ----------
+  const countObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      countObserver.unobserve(entry.target);
+      const el = entry.target;
+      const target = parseInt(el.dataset.count, 10);
+      const suffix = el.dataset.suffix || "";
+      const dur = 1400;
+      const t0 = performance.now();
+      function tick(now) {
+        const p = Math.min(1, (now - t0) / dur);
+        // ease-out — schnell starten, weich auslaufen (Apple-artig)
+        const eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(eased * target) + suffix;
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll(".stat .n").forEach(el => countObserver.observe(el));
+
+  // ---------- Spotlight + 3D-Tilt auf Feature-Karten ----------
+  const featGrid = document.getElementById("feature-grid");
+  featGrid.addEventListener("mousemove", (e) => {
+    const card = e.target.closest(".feature-card");
+    if (!card) return;
+    const r = card.getBoundingClientRect();
+    const px = e.clientX - r.left, py = e.clientY - r.top;
+    card.style.setProperty("--mx", px + "px");
+    card.style.setProperty("--my", py + "px");
+    // Sanfter 3D-Tilt in Richtung der Maus (Apple-Trackpad-Feeling)
+    const rx = ((py / r.height) - 0.5) * -7;
+    const ry = ((px / r.width) - 0.5) * 9;
+    card.classList.add("tilting");
+    card.style.transform = `translateY(-6px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+  });
+  featGrid.addEventListener("mouseout", (e) => {
+    const card = e.target.closest(".feature-card");
+    if (!card || card.contains(e.relatedTarget)) return;
+    card.classList.remove("tilting");
+    card.style.transform = "";
+  });
+
+  // ---------- 💥 Herzchen-Burst bei jedem Klick — in der GEWÄHLTEN Akzentfarbe ----------
+  function currentAccent() {
+    return getComputedStyle(document.documentElement)
+      .getPropertyValue("--pink").trim() || "#EC4899";
+  }
+  function lighten(hex, amt) {
+    const { r, g, b } = hexToRgb(hex);
+    const f = (v) => Math.min(255, Math.round(v + (255 - v) * amt));
+    return "#" + [f(r), f(g), f(b)].map(v => v.toString(16).padStart(2, "0")).join("");
+  }
+  function spawnHearts(x, y, count, big) {
+    const base = currentAccent();
+    // Drei Farbtöne der Akzentfarbe: normal, heller, dunkler — wirkt
+    // lebendiger als lauter identische Herzen.
+    const tones = [base, lighten(base, 0.35), darken(base, 0.25)];
+    for (let i = 0; i < count; i++) {
+      const s = document.createElement("span");
+      s.className = "burst-heart";
+      const size = (big ? 14 : 10) + Math.random() * (big ? 14 : 9);
+      const fill = tones[Math.floor(Math.random() * tones.length)];
+      s.innerHTML = `<svg width="${size}" height="${size}" viewBox="0 0 32 32">
+        <path fill="${fill}" d="M16 29S3 20.65 3 12a7.5 7.5 0 0 1 13-5.13A7.5 7.5 0 0 1 29 12c0 8.65-13 17-13 17z"/></svg>`;
+      const ang = (Math.PI * 2 * i) / count + Math.random() * 0.8;
+      const dist = (big ? 60 : 34) + Math.random() * (big ? 70 : 42);
+      s.style.left = x + "px";
+      s.style.top = y + "px";
+      s.style.setProperty("--bx", Math.cos(ang) * dist + "px");
+      s.style.setProperty("--by", Math.sin(ang) * dist - (big ? 46 : 26) + "px");
+      s.style.setProperty("--br", (Math.random() * 90 - 45) + "deg");
+      document.body.appendChild(s);
+      setTimeout(() => s.remove(), 850);
+    }
+  }
+  document.addEventListener("click", (e) => {
+    // Nicht in Formular-/Auswahl-Elementen (Farbwähler etc.) feuern
+    if (e.target.closest("input, select, textarea, .color-panel")) return;
+    // 🎉 Auf den großen Download-Buttons: Mega-Herzregen statt Mini-Burst
+    const isCta = e.target.closest("#hero-download-btn, #main-download-btn");
+    spawnHearts(e.clientX, e.clientY, isCta ? 16 : 6, !!isCta);
+  });
+
+  // ---------- 🔦 Weicher Leucht-Cursor (sanft nachziehend) ----------
+  (function cursorGlow() {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const glow = document.getElementById("cursor-glow");
+    let tx = -999, ty = -999, cx = -999, cy = -999, active = false;
+    document.addEventListener("mousemove", (e) => {
+      tx = e.clientX; ty = e.clientY;
+      if (!active) { active = true; cx = tx; cy = ty; loop(); }
+    }, { passive: true });
+    function loop() {
+      // Lerp: der Glow "schwebt" der Maus weich hinterher
+      cx += (tx - cx) * 0.12;
+      cy += (ty - cy) * 0.12;
+      glow.style.left = cx + "px";
+      glow.style.top = cy + "px";
+      requestAnimationFrame(loop);
+    }
+  })();
+
+  // ---------- 3D-Tilt auch auf den Preis-Karten ----------
+  const priceGrid = document.getElementById("pricing-grid");
+  priceGrid.addEventListener("mousemove", (e) => {
+    const card = e.target.closest(".price-card");
+    if (!card || card.classList.contains("selected")) return;
+    const r = card.getBoundingClientRect();
+    const rx = (((e.clientY - r.top) / r.height) - 0.5) * -6;
+    const ry = (((e.clientX - r.left) / r.width) - 0.5) * 8;
+    card.style.transform = `translateY(-6px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+  });
+  priceGrid.addEventListener("mouseout", (e) => {
+    const card = e.target.closest(".price-card");
+    if (!card || card.contains(e.relatedTarget)) return;
+    card.style.transform = "";
+  });
+
+  // ---------- Pills & Stats sind anklickbar (springen zur passenden Sektion) ----------
+  document.getElementById("marquee-track").addEventListener("click", (e) => {
+    if (e.target.closest(".platform-pill"))
+      document.getElementById("download").scrollIntoView({ behavior: "smooth" });
+  });
+  document.querySelectorAll(".stat").forEach(st => {
+    st.addEventListener("click", () =>
+      document.getElementById("features").scrollIntoView({ behavior: "smooth" }));
+  });
+
+  // ---------- Magnetischer Haupt-Button (zieht sich leicht zur Maus) ----------
+  (function magnetic() {
+    const btns = [document.getElementById("hero-download-btn"),
+                  document.getElementById("main-download-btn")].filter(Boolean);
+    btns.forEach(btn => {
+      btn.addEventListener("mousemove", (e) => {
+        const r = btn.getBoundingClientRect();
+        const x = (e.clientX - r.left - r.width / 2) * 0.18;
+        const y = (e.clientY - r.top - r.height / 2) * 0.28;
+        btn.style.transform = `translate(${x}px, ${y}px) scale(1.03)`;
+      });
+      btn.addEventListener("mouseleave", () => { btn.style.transform = ""; });
+    });
+  })();
+
+  // ---------- 💜 Schwebende Herzchen im Hero (Canvas, sehr dezent) ----------
+  (function hearts() {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const canvas = document.getElementById("hearts-canvas");
+    const hero = document.querySelector(".hero");
+    const ctx = canvas.getContext("2d");
+    let W, H, parts = [], running = true;
+
+    function accentRgb() {
+      const hex = getComputedStyle(document.documentElement)
+        .getPropertyValue("--pink").trim();
+      const m = hex.replace("#", "");
+      return `${parseInt(m.substr(0,2),16)}, ${parseInt(m.substr(2,2),16)}, ${parseInt(m.substr(4,2),16)}`;
+    }
+
+    function resize() {
+      W = canvas.width = hero.offsetWidth;
+      H = canvas.height = hero.offsetHeight;
+    }
+    resize();
+    window.addEventListener("resize", resize);
+
+    function spawn() {
+      return {
+        x: Math.random() * W,
+        y: H + 20,
+        s: 6 + Math.random() * 10,          // Größe
+        v: 0.25 + Math.random() * 0.5,      // Aufstiegs-Geschwindigkeit
+        drift: (Math.random() - 0.5) * 0.35,
+        a: 0,                                // Alpha (blendet erst ein)
+        maxA: 0.10 + Math.random() * 0.14,
+        wob: Math.random() * Math.PI * 2,   // Wackel-Phase
+      };
+    }
+    for (let i = 0; i < 14; i++) {
+      const p = spawn();
+      p.y = Math.random() * H;               // Start verteilt, nicht alle unten
+      parts.push(p);
+    }
+
+    function drawHeart(x, y, s, alpha, rgb) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(s / 16, s / 16);
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = `rgb(${rgb})`;
+      ctx.beginPath();
+      ctx.moveTo(0, 5);
+      ctx.bezierCurveTo(0, 2, -3, -2, -7, -2);
+      ctx.bezierCurveTo(-13, -2, -13, 6, -13, 6);
+      ctx.bezierCurveTo(-13, 10, -9, 14.5, 0, 20);
+      ctx.bezierCurveTo(9, 14.5, 13, 10, 13, 6);
+      ctx.bezierCurveTo(13, 6, 13, -2, 7, -2);
+      ctx.bezierCurveTo(3, -2, 0, 2, 0, 5);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function frame() {
+      if (!running) return;
+      ctx.clearRect(0, 0, W, H);
+      const rgb = accentRgb();
+      parts.forEach((p, i) => {
+        p.y -= p.v;
+        p.wob += 0.02;
+        p.x += p.drift + Math.sin(p.wob) * 0.3;
+        p.a = Math.min(p.maxA, p.a + 0.004);
+        if (p.y < -30) parts[i] = spawn();
+        drawHeart(p.x, p.y, p.s, p.a, rgb);
+      });
+      requestAnimationFrame(frame);
+    }
+    frame();
+
+    // 🐢 Performance: Animation pausieren, sobald der Hero aus dem Bild ist
+    new IntersectionObserver((entries) => {
+      const vis = entries[0].isIntersecting;
+      if (vis && !running) { running = true; frame(); }
+      else if (!vis) { running = false; }
+    }).observe(hero);
+  })();
+
+  // ---------- 🍪 Datenschutz-Hinweis (einmalig, rein informativ) ----------
+  (function cookieBanner() {
+    const banner = document.getElementById("cookie-banner");
+    if (localStorage.getItem("dl3_privacy_ack")) return;
+    setTimeout(() => banner.classList.add("show"), 1200);
+    document.getElementById("cookie-ok").addEventListener("click", () => {
+      localStorage.setItem("dl3_privacy_ack", "1");
+      banner.classList.remove("show");
+    });
+  })();
+
+  // 🚀 Ganz am Ende aufrufen, NACHDEM alle Funktionen/Variablen (u. a.
+  // initReveal/revealObserver) weiter oben im Skript bereits deklariert
+  // sind — sonst gibt's einen "Cannot access before initialization"-Fehler.
   setLang(lang);
 </script>
 </body>
