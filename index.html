@@ -689,7 +689,7 @@
     </div>
 
     <div class="stats-row reveal">
-      <div class="stat"><div class="n" data-count="6" data-suffix="+">0</div><div class="l" data-i18n="stat_platforms">Plattformen</div></div>
+      <div class="stat"><div class="n" data-count="8" data-suffix="+">0</div><div class="l" data-i18n="stat_platforms">Plattformen</div></div>
       <div class="stat"><div class="n" data-count="11" data-suffix="+">0</div><div class="l" data-i18n="stat_formats">Formate</div></div>
       <div class="stat"><div class="n" data-count="4" data-suffix="K">0</div><div class="l" data-i18n="stat_res">Max. Auflösung</div></div>
       <div class="stat"><div class="n" data-count="10" data-suffix="+">0</div><div class="l" data-i18n="stat_langs">Untertitel-Sprachen</div></div>
@@ -792,6 +792,30 @@
         <li data-i18n-html="dl_how_2"><b>Ordner öffnen</b> und die <i>Downloader3.exe</i> (mit dem 💜-Herz-Symbol) doppelklicken. Wichtig: Die .exe im Ordner lassen — sie braucht den „_internal“-Ordner daneben.</li>
         <li data-i18n-html="dl_how_3"><b>Falls Windows-SmartScreen warnt:</b> „Weitere Informationen“ → „Trotzdem ausführen“. Die Warnung kommt nur, weil die App kein teures Microsoft-Zertifikat hat — nicht wegen des Inhalts (siehe FAQ). Fertig! 🎉</li>
       </ol>
+    </div>
+
+    <!-- 🛡️ Transparenz-Karte: VirusTotal-Ergebnisse ehrlich erklärt, im
+         Karten-Stil der Seite (keine eingebetteten Screenshots — die
+         VirusTotal-Oberfläche ist hell/anders gestylt und würde nicht zum
+         dunklen Look der Seite passen). -->
+    <div class="reveal" style="max-width:640px; margin:18px auto 0; text-align:left; background:var(--card); border:1px solid var(--border); border-radius:16px; padding:22px 26px;">
+      <h3 style="margin:0 0 14px; font-size:15px; color:var(--pink);" data-i18n="vt_title">🛡️ Transparenz zu den VirusTotal-Ergebnissen</h3>
+      <div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:16px;">
+        <div style="flex:1; min-width:150px; background:var(--card2); border:1px solid var(--border); border-radius:12px; padding:14px 10px; text-align:center;">
+          <div style="font-size:24px; font-weight:800; color:var(--pink);">2<span style="color:var(--muted); font-size:14px; font-weight:600;"> / 64</span></div>
+          <div style="font-size:11px; color:var(--muted); margin-top:4px;" data-i18n="vt_zip_label">Scanner beim ZIP-Download</div>
+        </div>
+        <div style="flex:1; min-width:150px; background:var(--card2); border:1px solid var(--border); border-radius:12px; padding:14px 10px; text-align:center;">
+          <div style="font-size:24px; font-weight:800; color:var(--pink);">3<span style="color:var(--muted); font-size:14px; font-weight:600;"> / 65</span></div>
+          <div style="font-size:11px; color:var(--muted); margin-top:4px;" data-i18n="vt_exe_label">Scanner bei der entpackten .exe</div>
+        </div>
+        <div style="flex:1; min-width:150px; background:var(--card2); border:1px solid var(--border); border-radius:12px; padding:14px 10px; text-align:center;">
+          <div style="font-size:24px; font-weight:800; color:#34D399;">60+</div>
+          <div style="font-size:11px; color:var(--muted); margin-top:4px;" data-i18n="vt_clean_label">finden nichts (u.&nbsp;a. Defender, ESET, Bitdefender)</div>
+        </div>
+      </div>
+      <p style="margin:0 0 10px; color:var(--muted); font-size:13.5px; line-height:1.7;" data-i18n-html="vt_p1">…</p>
+      <p style="margin:0; color:var(--muted); font-size:13.5px; line-height:1.7;" data-i18n-html="vt_p2">…</p>
     </div>
   </div>
 </section>
@@ -904,11 +928,18 @@
       dl_how_2: "<b>Ordner öffnen</b> und die <i>Downloader3.exe</i> (mit dem 💜-Herz-Symbol) doppelklicken. Wichtig: Die .exe im Ordner lassen — sie braucht den „_internal“-Ordner daneben.",
       dl_how_3: "<b>Falls Windows-SmartScreen warnt:</b> „Weitere Informationen“ → „Trotzdem ausführen“. Die Warnung kommt nur, weil die App kein teures Microsoft-Zertifikat hat — nicht wegen des Inhalts (siehe FAQ). Fertig! 🎉",
       dl_safety: "🛡️ <b>Kein Virus — prüf's gerne selbst</b> (empfohlen!): Datei z. B. bei <a href='https://www.virustotal.com' target='_blank' rel='noopener'>virustotal.com</a> hochladen (70+ Scanner) oder mit Malwarebytes/ESET scannen. Windows-SmartScreen warnt nur, weil die App kein teures Microsoft-Zertifikat hat (mehrere hundert €/Jahr — für ein Hobby-Projekt nicht drin), nicht wegen des Inhalts. Details im FAQ.",
+      vt_title: "🛡️ Transparenz zu den VirusTotal-Ergebnissen",
+      vt_zip_label: "Scanner beim ZIP-Download",
+      vt_exe_label: "Scanner bei der entpackten .exe",
+      vt_clean_label: "finden nichts (u.&nbsp;a. Defender, ESET, Bitdefender)",
+      vt_p1: "Aktueller Stand: bei der ZIP-Datei schlagen 2 von 64 Scannern an, bei der entpackten .exe 3 von 65 — konkret <b>Bkav Pro</b> (meldet praktisch jede unsignierte, mit PyInstaller gebaute Python-App als vermeintliches 'W32.Malware'), <b>SentinelOne (Static ML)</b> ('Suspicious PE/Archive' — eine reine KI-Heuristik ohne konkreten Fund) und vereinzelt <b>SecureAge</b>. Alle drei sind bekannt für eine hohe Fehlalarmquote bei genau dieser Art von Datei. Die <b>60+ bekanntesten &amp; zuverlässigsten Scanner</b> (Microsoft Defender, Kaspersky, Bitdefender, ESET, Avast, Malwarebytes, Norton, McAfee u.&nbsp;v.&nbsp;a.) finden nichts.",
+      vt_p2: "Der Grund: PyInstaller bündelt den kompletten Python-Interpreter plus alle Bibliotheken (u.&nbsp;a. yt-dlp, FFmpeg-Werkzeuge) in einer einzigen, komprimierten .exe — das sieht für ein paar heuristische KI-Scanner rein strukturell ähnlich aus wie manche Malware-Packer, unabhängig vom tatsächlichen Inhalt. Da die App zusätzlich kein teures Microsoft-Zertifikat hat (siehe FAQ), fällt sie bei diesen wenigen Scannern zusätzlich auf. Die App macht nichts Verstecktes: Downloads laufen ausschließlich über die dokumentierten Wege (yt-dlp, FFmpeg, die eigene Backend-API) — nichts sammelt heimlich Daten oder verändert dein System. Am besten selbst &amp; bei jeder neuen Version erneut prüfen: <a href='https://www.virustotal.com' target='_blank' rel='noopener'>virustotal.com</a>.",
       seo_h: "Free YouTube Video Downloader für Windows — MP4, MP3 & 4K",
-      seo_p: "Downloader&lt;3 ist ein kostenloser Video-Downloader für Windows: YouTube-Videos als MP4 herunterladen, YouTube zu MP3 konvertieren, TikTok-Videos ohne Wasserzeichen speichern, Instagram Reels downloaden, Facebook-Videos sichern und SoundCloud-Musik laden — bis zu 4K-Auflösung, mit Playlist- und Kanal-Download, Untertitel-Übersetzung und Warteschlange für mehrere Downloads gleichzeitig. Free YouTube download, video downloader free, YouTube to MP3 converter — alles in einer App, ohne Werbung, auf Deutsch und Englisch.",
+      seo_p: "Downloader&lt;3 ist ein kostenloser Video-Downloader für Windows: YouTube-Videos als MP4 herunterladen, YouTube zu MP3 konvertieren, TikTok-Videos ohne Wasserzeichen speichern, Instagram Reels downloaden, Facebook-Videos sichern, SoundCloud-Musik laden und Spotify-, Apple-Music- &amp; Amazon-Music-Songs und -Playlists legal per YouTube-Suche herunterladen — bis zu 4K-Auflösung, mit Playlist- und Kanal-Download, Untertitel-Übersetzung und Warteschlange für mehrere Downloads gleichzeitig. Free YouTube download, video downloader free, YouTube to MP3 converter, Spotify playlist download — alles in einer App, ohne Werbung, auf Deutsch und Englisch.",
       legal_text: "Downloader&lt;3 ist ein privates Hobby-Projekt. Bitte nutze die App nur für eigene Inhalte oder Inhalte, die du herunterladen darfst — das Herunterladen fremder, urheberrechtlich geschützter Inhalte kann gegen die Nutzungsbedingungen der jeweiligen Plattform verstoßen.",
       features: [
         ["🌍", "Multi-Plattform", "YouTube, TikTok, Instagram, Facebook — plus 🌐 Web-Browser für praktisch jede andere Seite mit Video/Audio (Premium)."],
+        ["🎧", "Spotify, Apple Music &amp; Amazon Music", 'Song- oder Playlist-Link einfügen, fertig: die App erkennt Titel &amp; Interpret und lädt den passenden Song ganz normal &amp; legal von YouTube — funktioniert weltweit. <span class="tag">Premium</span>'],
         ["🎞️", "Alle gängigen Formate", "MP4, MP3, WAV, M4A, WEBM, MKV, MOV, GIF, JPG, PNG und PDF — je nach Plattform automatisch die passenden Optionen."],
         ["📐", "Bis zu 4K + Auto-Upscaling", "480p bis 4K wählbar. Liegt ein Video nur in geringerer Auflösung vor, kann die App es automatisch hochskalieren — mit GPU-Beschleunigung, wenn verfügbar."],
         ["🤖", "KI-Modus", 'Link einfügen, fertig: die App erkennt Plattform, wählt die beste Auflösung automatisch und schlägt das passende Format vor. <span class="tag">Premium</span>'],
@@ -926,7 +957,7 @@
         ["🚦", "Bandbreite &amp; Proxy", "Download-Geschwindigkeit begrenzen und eine Proxy-/VPN-Adresse hinterlegen — volle Kontrolle über die Verbindung."],
       ],
       steps: [
-        ["Link einfügen", "Video- oder Audio-Link aus YouTube, TikTok, Instagram, Facebook, SoundCloud, Discord-Servern oder dem Web kopieren und einfügen — auch ganze Kanäle/Playlists auf einmal."],
+        ["Link einfügen", "Video- oder Audio-Link aus YouTube, TikTok, Instagram, Facebook, SoundCloud, Spotify, Discord-Servern oder dem Web kopieren und einfügen — auch ganze Kanäle/Playlists auf einmal."],
         ["Format &amp; Auflösung wählen", "Zwischen MP4, MP3, WAV, FLAC und vielen weiteren Formaten wählen — oder den KI-Modus einfach automatisch entscheiden lassen."],
         ["Herunterladen", "Ein Klick auf Download — die Datei landet automatisch sauber sortiert im richtigen Unterordner, mit Fortschrittsanzeige in Echtzeit."],
       ],
@@ -946,8 +977,9 @@
         ["Funktioniert es auch mit TikTok ohne Wasserzeichen?", "Ja, dafür gibt es die Option '🚫 Ohne Wasserzeichen' bei der Plattformauswahl."],
         ["Kann ich Instagram Reels und Storys herunterladen?", "Ja, Instagram-Links (inkl. Reels) werden unterstützt. Ganze private Alben brauchen einen Login und funktionieren technisch bedingt nicht — direkte Bild-/Video-Links aber schon."],
         ["Funktioniert Downloader<3 weltweit?", "Ja, die App ist zweisprachig (Deutsch/Englisch) und funktioniert unabhängig vom Standort. Einzelne Inhalte können je nach Plattform regional eingeschränkt sein — das liegt dann an der jeweiligen Plattform, nicht an der App."],
+        ["Kann ich Spotify-, Apple-Music- oder Amazon-Music-Songs herunterladen?", "Ja (Premium) — Song-, Album- oder Playlist-Link einfügen. Wichtig: Es wird dabei NICHTS direkt/verschlüsselt von diesen Diensten heruntergeladen (das wäre eine Umgehung von Kopierschutz und in den meisten Ländern verboten, auch für zahlende Abo-Kunden). Stattdessen liest die App nur den öffentlichen Songtitel &amp; Künstler aus und lädt den passenden Song ganz normal &amp; legal von YouTube — genau wie ein normaler YouTube-Download. Spotify unterstützt einzelne Songs, Alben UND komplette Playlists; bei Apple Music &amp; Amazon Music aktuell einzelne Songs."],
         ["Ist die App ein Virus? Warum warnt Windows beim Start?", "Nein — Downloader<3 enthält keinerlei Schadsoftware. Die Windows-SmartScreen-Warnung ('Der Computer wurde durch Windows geschützt') erscheint nur, weil die App nicht mit einem Microsoft-Code-Signatur-Zertifikat signiert ist. Solche Zertifikate kosten mehrere hundert Euro pro Jahr — für ein privates Hobby-Projekt schlicht nicht machbar. Die Warnung sagt nichts über den Inhalt aus, sondern nur, dass der Herausgeber Microsoft unbekannt ist. Zum Starten: 'Weitere Informationen' → 'Trotzdem ausführen'."],
-        ["Kann ich die Datei selbst auf Viren prüfen?", "Ja, unbedingt — das empfehlen wir sogar ausdrücklich für deine eigene Sicherheit! Lade die .exe z. B. bei virustotal.com hoch (prüft mit 70+ Virenscannern gleichzeitig, kostenlos, ohne Anmeldung) oder scanne sie lokal mit Malwarebytes oder dem kostenlosen ESET Online Scanner. Gesunde Skepsis gegenüber Downloads aus dem Internet ist immer richtig — genau deshalb laden wir jeden ein, selbst nachzuprüfen."],
+        ["Kann ich die Datei selbst auf Viren prüfen?", "Ja, unbedingt — das empfehlen wir sogar ausdrücklich für deine eigene Sicherheit! Lade die .exe z. B. bei virustotal.com hoch (prüft mit 70+ Virenscannern gleichzeitig, kostenlos, ohne Anmeldung) oder scanne sie lokal mit Malwarebytes oder dem kostenlosen ESET Online Scanner. Gesunde Skepsis gegenüber Downloads aus dem Internet ist immer richtig — genau deshalb laden wir jeden ein, selbst nachzuprüfen. Aktueller Stand bei VirusTotal: von 64-65 Scannern schlagen meist nur 2-3 an (z. B. 'Bkav Pro' und ein oder zwei ML-Heuristik-Scanner) — das sind bekannte Fehlalarme bei jeder unsignierten, mit PyInstaller gebauten Python-App, keine echten Funde. Mehr Details dazu direkt hier unten bei 'Transparenz zu den VirusTotal-Ergebnissen'."],
       ],
     },
     en: {
@@ -997,11 +1029,18 @@
       dl_how_2: "<b>Open the folder</b> and double-click <i>Downloader3.exe</i> (with the 💜 heart icon). Important: keep the .exe inside the folder — it needs the “_internal” folder next to it.",
       dl_how_3: "<b>If Windows SmartScreen warns you:</b> click “More info” → “Run anyway”. The warning only appears because the app has no expensive Microsoft certificate — not because of its contents (see FAQ). Done! 🎉",
       dl_safety: "🛡️ <b>Not a virus — feel free to verify yourself</b> (recommended!): upload the file to <a href='https://www.virustotal.com' target='_blank' rel='noopener'>virustotal.com</a> (70+ scanners) or scan with Malwarebytes/ESET. Windows SmartScreen only warns because the app has no expensive Microsoft certificate (several hundred €/year — not feasible for a hobby project), not because of its contents. Details in the FAQ.",
+      vt_title: "🛡️ Transparency about the VirusTotal results",
+      vt_zip_label: "scanners on the ZIP download",
+      vt_exe_label: "scanners on the extracted .exe",
+      vt_clean_label: "find nothing (incl. Defender, ESET, Bitdefender)",
+      vt_p1: "Current status: on the ZIP file, 2 out of 64 scanners flag it; on the extracted .exe, 3 out of 65 — specifically <b>Bkav Pro</b> (flags practically every unsigned, PyInstaller-built Python app as a supposed 'W32.Malware'), <b>SentinelOne (Static ML)</b> ('Suspicious PE/Archive' — a pure AI heuristic with no concrete finding), and occasionally <b>SecureAge</b>. All three are known for a high false-positive rate on exactly this kind of file. The <b>60+ best-known and most reliable scanners</b> (Microsoft Defender, Kaspersky, Bitdefender, ESET, Avast, Malwarebytes, Norton, McAfee, and many more) find nothing.",
+      vt_p2: "The reason: PyInstaller bundles the entire Python interpreter plus all libraries (incl. yt-dlp, FFmpeg tools) into a single, compressed .exe — to a few heuristic AI scanners, that structurally resembles some malware packers, regardless of the actual content. Since the app also isn't signed with an expensive Microsoft certificate (see FAQ), it stands out a bit more to these few scanners. The app doesn't do anything hidden: downloads only ever go through the documented paths (yt-dlp, FFmpeg, our own backend API) — nothing secretly collects data or modifies your system. Best to check for yourself, and again with every new version: <a href='https://www.virustotal.com' target='_blank' rel='noopener'>virustotal.com</a>.",
       seo_h: "Free YouTube Video Downloader for Windows — MP4, MP3 & 4K",
-      seo_p: "Downloader&lt;3 is a free video downloader for Windows: download YouTube videos as MP4, convert YouTube to MP3, save TikTok videos without watermark, download Instagram Reels, save Facebook videos and grab SoundCloud music — up to 4K resolution, with playlist & channel download, subtitle translation and a queue for multiple downloads at once. Free YouTube download, video downloader free, YouTube to MP3 converter — all in one app, ad-free, in English and German.",
+      seo_p: "Downloader&lt;3 is a free video downloader for Windows: download YouTube videos as MP4, convert YouTube to MP3, save TikTok videos without watermark, download Instagram Reels, save Facebook videos, grab SoundCloud music, and download Spotify, Apple Music & Amazon Music songs and playlists legally via YouTube search — up to 4K resolution, with playlist & channel download, subtitle translation and a queue for multiple downloads at once. Free YouTube download, video downloader free, YouTube to MP3 converter, Spotify playlist download — all in one app, ad-free, in English and German.",
       legal_text: "Downloader&lt;3 is a private hobby project. Please only use the app for your own content or content you're allowed to download — downloading other people's copyrighted content may violate the respective platform's terms of service.",
       features: [
         ["🌍", "Multi-platform", "YouTube, TikTok, Instagram, Facebook — plus 🌐 web browser support for almost any other site with video/audio (Premium)."],
+        ["🎧", "Spotify, Apple Music &amp; Amazon Music", 'Paste a song or playlist link and go: the app detects the title &amp; artist and downloads the matching song completely legally from YouTube — works worldwide. <span class="tag">Premium</span>'],
         ["🎞️", "All common formats", "MP4, MP3, WAV, M4A, WEBM, MKV, MOV, GIF, JPG, PNG and PDF — the right options appear automatically per platform."],
         ["📐", "Up to 4K + auto-upscaling", "Choose from 480p up to 4K. If a video is only available in lower quality, the app can automatically upscale it — using GPU acceleration when available."],
         ["🤖", "AI mode", 'Paste a link and go: the app detects the platform, picks the best resolution automatically, and suggests the right format. <span class="tag">Premium</span>'],
@@ -1019,7 +1058,7 @@
         ["🚦", "Bandwidth &amp; proxy", "Limit download speed and set a proxy/VPN address — full control over the connection."],
       ],
       steps: [
-        ["Paste a link", "Copy a video or audio link from YouTube, TikTok, Instagram, Facebook, SoundCloud, Discord servers, or the web and paste it in — even whole channels/playlists at once."],
+        ["Paste a link", "Copy a video or audio link from YouTube, TikTok, Instagram, Facebook, SoundCloud, Spotify, Discord servers, or the web and paste it in — even whole channels/playlists at once."],
         ["Choose format &amp; resolution", "Pick from MP4, MP3, WAV, FLAC, and many more formats — or let AI mode decide automatically."],
         ["Download", "One click on Download — the file lands neatly sorted into the right subfolder automatically, with a live progress bar."],
       ],
@@ -1039,8 +1078,9 @@
         ["Does it work with TikTok without a watermark?", "Yes, there's a '🚫 No watermark' option in the platform selector."],
         ["Can I download Instagram Reels and stories?", "Yes, Instagram links (including Reels) are supported. Whole private albums need a login and technically don't work — but direct image/video links do."],
         ["Does Downloader<3 work worldwide?", "Yes, the app is bilingual (German/English) and works regardless of location. Individual content may be regionally restricted depending on the platform — that's on the platform's side, not the app."],
+        ["Can I download Spotify, Apple Music, or Amazon Music songs?", "Yes (Premium) — paste a song, album, or playlist link. Important: NOTHING is downloaded directly/encrypted from these services (that would be copy-protection circumvention and illegal in most countries, even for paying subscribers). Instead, the app only reads the public song title & artist and downloads the matching song completely legally from YouTube — exactly like a normal YouTube download. Spotify supports single tracks, albums, AND whole playlists; Apple Music & Amazon Music currently support single tracks."],
         ["Is the app a virus? Why does Windows warn me on launch?", "No — Downloader<3 contains no malware whatsoever. The Windows SmartScreen warning ('Windows protected your PC') only appears because the app isn't signed with a Microsoft code-signing certificate. Those certificates cost several hundred euros per year — simply not feasible for a private hobby project. The warning says nothing about the file's contents, only that the publisher is unknown to Microsoft. To launch: 'More info' → 'Run anyway'."],
-        ["Can I check the file for viruses myself?", "Yes, absolutely — we even explicitly encourage it for your own safety! Upload the .exe to virustotal.com (checks with 70+ antivirus engines at once, free, no sign-up) or scan it locally with Malwarebytes or the free ESET Online Scanner. Healthy skepticism toward downloads from the internet is always right — that's exactly why we invite everyone to verify for themselves."],
+        ["Can I check the file for viruses myself?", "Yes, absolutely — we even explicitly encourage it for your own safety! Upload the .exe to virustotal.com (checks with 70+ antivirus engines at once, free, no sign-up) or scan it locally with Malwarebytes or the free ESET Online Scanner. Healthy skepticism toward downloads from the internet is always right — that's exactly why we invite everyone to verify for themselves. Current status on VirusTotal: usually only 2-3 out of 64-65 scanners flag it (e.g. 'Bkav Pro' and one or two ML heuristic scanners) — these are well-known false positives for any unsigned, PyInstaller-built Python app, not real findings. More details right below under 'Transparency about the VirusTotal results'."],
       ],
     },
   };
@@ -1321,7 +1361,7 @@
   // ---------- Endlos-Laufband mit Plattform-Pills ----------
   (function buildMarquee() {
     const PILLS = ["▶️ YouTube", "🎵 TikTok", "📷 Instagram", "📘 Facebook",
-                   "🎧 SoundCloud", "🎮 Discord", "🌐 Web"];
+                   "🎧 SoundCloud", "🎧 Spotify & Co.", "🎮 Discord", "🌐 Web"];
     const track = document.getElementById("marquee-track");
     // Doppelt einfügen → nahtlose Endlos-Schleife (translateX(-50%))
     track.innerHTML = [...PILLS, ...PILLS].map(p =>
