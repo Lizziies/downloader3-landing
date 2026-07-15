@@ -376,7 +376,17 @@
     max-height: 0; overflow: hidden; transition: max-height .4s var(--ease), padding .4s var(--ease);
     color: var(--muted); font-size: 14px; padding: 0 4px;
   }
-  .faq-item.open .faq-a { max-height: 240px; padding: 0 4px 20px; }
+  /* 🐛 FIX ("Text abgeschnitten bei längeren FAQ-Antworten, v. a. auf dem
+     Handy"): Der feste Wert max-height:240px war für kurze Antworten
+     gedacht — bei längeren Antworten (z. B. Spotify/Virus-Fragen) und auf
+     schmalen Handy-Bildschirmen (mehr Zeilenumbrüche = mehr Höhe nötig)
+     reichten 240px oft nicht, der Text wurde unten abgeschnitten. Die Höhe
+     wird jetzt per JavaScript exakt auf die tatsächlich benötigte Höhe der
+     jeweiligen Antwort gesetzt (siehe renderFaq) statt eines geratenen
+     Festwerts — dieser Fallback greift nur, falls JS aus irgendeinem Grund
+     nicht läuft.
+  */
+  .faq-item.open .faq-a { max-height: 900px; padding: 0 4px 20px; }
 
   /* ---------- Download CTA ---------- */
   .download-glow { position: relative; }
@@ -963,7 +973,7 @@
       ],
       pricing: [
         ["Gratis", "0 €", "für immer", ["YouTube-Links als MP4", "480p &amp; 720p Auflösung", "Favoriten &amp; Verlauf", "Individuelles Design"], false],
-        ["30 Tage", "2,99 €", "einmalig", ["Alle Formate &amp; Plattformen", "Auflösung bis 4K + Auto-Upscaling", "KI-Modus &amp; Web-Browser"], false],
+        ["30 Tage", "2,99 €", "einmalig", ["Alle Formate &amp; Plattformen", "Auflösung bis 4K + Auto-Upscaling", "KI-Modus &amp; Web-Browser", "🎧 Spotify, Apple Music &amp; Amazon Music"], false],
         ["1 Jahr", "19,99 €", "einmalig", ["Alles aus 30 Tage", "Bestes Preis-Leistungs-Verhältnis", "Ein Jahr sorgenfrei"], true],
         ["Für immer", "39,99 €", "einmalig", ["Einmal zahlen, für immer nutzen", "Alle zukünftigen Updates", "Kein Ablaufdatum"], false],
       ],
@@ -1064,7 +1074,7 @@
       ],
       pricing: [
         ["Free", "€0", "forever", ["YouTube links as MP4", "480p &amp; 720p resolution", "Favorites &amp; history", "Custom design"], false],
-        ["30 days", "€2.99", "one-time", ["All formats &amp; platforms", "Resolution up to 4K + auto-upscaling", "AI mode &amp; web browser"], false],
+        ["30 days", "€2.99", "one-time", ["All formats &amp; platforms", "Resolution up to 4K + auto-upscaling", "AI mode &amp; web browser", "🎧 Spotify, Apple Music &amp; Amazon Music"], false],
         ["1 year", "€19.99", "one-time", ["Everything from 30 days", "Best value for money", "A worry-free year"], true],
         ["Forever", "€39.99", "one-time", ["Pay once, use forever", "All future updates", "No expiration date"], false],
       ],
@@ -1164,14 +1174,38 @@
         <div class="faq-a"><p>${a}</p></div>
       </div>
     `).join("");
+    // 🐛 FIX ("Text abgeschnitten bei längeren FAQ-Antworten, v. a. auf dem
+    // Handy"): max-height wird jetzt individuell auf die tatsächliche
+    // Höhe JEDER Antwort gesetzt (scrollHeight), statt eines pauschalen
+    // Festwerts — dadurch passt es unabhängig davon, wie lang die Antwort
+    // ist oder wie schmal der Bildschirm (mehr Zeilenumbrüche = mehr
+    // benötigte Höhe).
+    function setFaqHeight(item) {
+      const a = item.querySelector(".faq-a");
+      if (a) a.style.maxHeight = item.classList.contains("open")
+        ? a.scrollHeight + 20 + "px" : "";
+    }
     list.querySelectorAll(".faq-q").forEach(btn => {
       btn.addEventListener("click", () => {
         const item = btn.closest(".faq-item");
         const wasOpen = item.classList.contains("open");
-        list.querySelectorAll(".faq-item.open").forEach(o => o.classList.remove("open"));
-        if (!wasOpen) item.classList.add("open");
+        list.querySelectorAll(".faq-item.open").forEach(o => {
+          o.classList.remove("open");
+          setFaqHeight(o);
+        });
+        if (!wasOpen) {
+          item.classList.add("open");
+          setFaqHeight(item);
+        }
       });
     });
+    // 📱 Bei Fenstergröße-/Orientierungswechsel (z. B. Handy gedreht) die
+    // Höhe der gerade offenen Antwort neu berechnen, falls sich dadurch
+    // die Zeilenumbrüche ändern.
+    window.addEventListener("resize", () => {
+      const open = list.querySelector(".faq-item.open");
+      if (open) setFaqHeight(open);
+    }, { passive: true });
   }
 
   function setLang(newLang) {
