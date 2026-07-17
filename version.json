@@ -1,5 +1,6 @@
 {
   "version": "1.7.0",
   "url": "https://lizziies.github.io/downloader3-landing/#download",
-  "_hinweis": "Bei JEDEM neuen Release: 'version' hier auf die neue Versionsnummer setzen und die Datei ins downloader3-landing-Repo hochladen. Alle laufenden Apps zeigen dann automatisch den Update-Hinweis. 'url' ist die Seite, die der Download-Button im Update-Fenster oeffnet."
+  "zip_url": "https://github.com/Lizziies/downloader3-landing/releases/download/v1.7.0/Downloader3.zip",
+  "_hinweis": "Bei JEDEM neuen Release: 'version' hier auf die neue Versionsnummer setzen und die Datei ins downloader3-landing-Repo hochladen. Alle laufenden Apps zeigen dann automatisch den Update-Hinweis. 'url' ist die Seite, die der Download-Button im Update-Fenster oeffnet, FALLS 'zip_url' fehlt/falsch ist (Rueckfall). 'zip_url' (NEU) ist der DIREKTE Download-Link zur .zip-Datei des neuen Releases (z. B. der GitHub-Release-Asset-Link, wie im Landing-Page-Download-Button verwendet) -- ist sie korrekt gesetzt, laedt die App die neue Version automatisch INNERHALB des Update-Fensters herunter, statt nur den Browser zu oeffnen. Bei JEDEM neuen Release also auch DIESEN Link auf die neue Versionsnummer/das neue Release-Tag anpassen, sonst wird weiter die alte Version heruntergeladen!"
 }
