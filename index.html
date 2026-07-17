@@ -830,6 +830,23 @@
   </div>
 </section>
 
+<!-- 🤝 Ehrentafel: zeigt die E-Mail-Helfer, die sich freiwillig dafür
+     entschieden haben, öffentlich genannt zu werden (Opt-in im
+     Helfer-Tab der App, eigener Anzeigename, KEINE echte E-Mail-Adresse
+     wird hier je angezeigt). Wird per JS live vom Backend geladen. -->
+<section id="helpers" style="padding: 8px 0 8px;">
+  <div class="wrap" style="text-align:center;">
+    <span class="eyebrow reveal" data-i18n="helpers_eyebrow">DANKE</span>
+    <h2 class="reveal" style="font-size: clamp(22px,2.6vw,28px); font-weight:800; margin: 10px 0 8px;" data-i18n="helpers_title">Unsere Helfer 💜</h2>
+    <p class="reveal" style="color:var(--muted); max-width:520px; margin: 0 auto 22px;" data-i18n="helpers_lead">
+      Diese Menschen unterstützen Downloader&lt;3 mit Ideen, Feedback und Weiterempfehlungen — danke euch! 🙏
+    </p>
+    <div id="helpers-list" class="reveal" style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; max-width:640px; margin:0 auto;">
+      <span style="color:var(--muted); font-size:13px;" data-i18n="helpers_empty">Noch niemand hier — werde als Erste(r) Helfer und lass dich hier feiern! 💜</span>
+    </div>
+  </div>
+</section>
+
 <!-- 🔍 SEO-Textblock: sichtbarer, ehrlicher Fließtext mit den wichtigsten
      Suchbegriffen — genau das, was Suchmaschinen indexieren. (Versteckter
      Text wäre abstrafbar, deshalb bewusst sichtbar und dezent.) -->
@@ -933,6 +950,10 @@
       dl_lead: "Kostenlos, in wenigen Sekunden startklar. Windows 10/11.",
       dl_cta: "⬇ Downloader&lt;3 herunterladen (ZIP)",
       dl_hint: "*Für Premium-Funktionen ist ein kostenloses Konto in der App nötig.",
+      helpers_eyebrow: "DANKE",
+      helpers_title: "Unsere Helfer 💜",
+      helpers_lead: "Diese Menschen unterstützen Downloader&lt;3 mit Ideen, Feedback und Weiterempfehlungen — danke euch! 🙏",
+      helpers_empty: "Noch niemand hier — werde als Erste(r) Helfer und lass dich hier feiern! 💜",
       dl_how_t: "📝 So installierst du die App (dauert keine Minute):",
       dl_how_1: "<b>ZIP entpacken:</b> Rechtsklick auf die heruntergeladene <i>Downloader3.zip</i> → „Alle extrahieren…“ → Ort wählen (z.&nbsp;B. Desktop oder Dokumente).",
       dl_how_2: "<b>Ordner öffnen</b> und die <i>Downloader3.exe</i> (mit dem 💜-Herz-Symbol) doppelklicken. Wichtig: Die .exe im Ordner lassen — sie braucht den „_internal“-Ordner daneben.",
@@ -1035,6 +1056,10 @@
       dl_lead: "Free, ready to use in seconds. Windows 10/11.",
       dl_cta: "⬇ Download Downloader&lt;3 (ZIP)",
       dl_hint: "*A free account in the app is required for Premium features.",
+      helpers_eyebrow: "THANK YOU",
+      helpers_title: "Our Helpers 💜",
+      helpers_lead: "These people support Downloader&lt;3 with ideas, feedback, and word of mouth — thank you! 🙏",
+      helpers_empty: "No one yet — be the first Helper and get celebrated here! 💜",
       dl_how_t: "📝 How to install the app (takes less than a minute):",
       dl_how_1: "<b>Extract the ZIP:</b> right-click the downloaded <i>Downloader3.zip</i> → “Extract All…” → pick a location (e.g. Desktop or Documents).",
       dl_how_2: "<b>Open the folder</b> and double-click <i>Downloader3.exe</i> (with the 💜 heart icon). Important: keep the .exe inside the folder — it needs the “_internal” folder next to it.",
@@ -1575,6 +1600,30 @@
           (a.name || "").toLowerCase().endsWith(".zip"));
         const btn = document.getElementById("main-download-btn");
         if (asset && btn) btn.href = asset.browser_download_url;
+      })
+      .catch(() => {});
+  })();
+
+  // ---------- 🤝 Ehrentafel: lädt die Liste der Helfer, die sich im
+  // Helfer-Tab der App freiwillig fürs öffentliche Zeigen entschieden
+  // haben (Opt-in, eigener Anzeigename -- NIE die echte E-Mail-Adresse).
+  (function loadHelpersHonorBoard() {
+    const BACKEND_URL = "https://downloader3-backend.onrender.com";
+    const box = document.getElementById("helpers-list");
+    if (!box) return;
+    fetch(`${BACKEND_URL}/api/helpers-public`)
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(data => {
+        const names = (data.helpers || []).filter(Boolean);
+        if (!names.length) return;  // Platzhaltertext im HTML bleibt stehen
+        box.innerHTML = "";
+        names.forEach(name => {
+          const pill = document.createElement("span");
+          pill.textContent = "🤝 " + name;
+          pill.style.cssText = "background:var(--card); border:1px solid var(--border); " +
+            "border-radius:999px; padding:8px 16px; font-size:13px; font-weight:600;";
+          box.appendChild(pill);
+        });
       })
       .catch(() => {});
   })();
