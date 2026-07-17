@@ -1557,6 +1557,28 @@
       document.getElementById("features").scrollIntoView({ behavior: "smooth" }));
   });
 
+  // ---------- 🌍 Download-Button: holt sich den ECHTEN neuesten
+  // Release-Link direkt von GitHub (statt sich auf einen exakten
+  // Dateinamen wie "Downloader3.zip" zu verlassen -- heißt die
+  // hochgeladene Datei z. B. "Downloader3-v1.9.46.zip" mit
+  // Versionsnummer im Namen, würde der feste "latest/download/..."-Link
+  // sonst "Not Found" zeigen). Nur der EINE echte Download-Button
+  // (main-download-btn) wird umgebogen -- hero-download-btn bleibt ein
+  // Scroll-Link zur Download-Sektion (mit Anleitung/Viren-Hinweis), kein
+  // Direkt-Download. Schlägt der Abruf fehl (Rate-Limit, Netzwerk),
+  // bleibt der im HTML hinterlegte Link als Rückfall aktiv.
+  (function fixDownloadLink() {
+    fetch("https://api.github.com/repos/Lizziies/downloader3-landing/releases/latest")
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(data => {
+        const asset = (data.assets || []).find(a =>
+          (a.name || "").toLowerCase().endsWith(".zip"));
+        const btn = document.getElementById("main-download-btn");
+        if (asset && btn) btn.href = asset.browser_download_url;
+      })
+      .catch(() => {});
+  })();
+
   // ---------- Magnetischer Haupt-Button (zieht sich leicht zur Maus) ----------
   (function magnetic() {
     const btns = [document.getElementById("hero-download-btn"),
