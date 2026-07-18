@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 💜 Einfacher dunkler Hintergrund während App-Start, passend zum
+     Dark-Theme der App (siehe theme.dart -> kBgDark). -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@android:color/black" />
+</layer-list>
