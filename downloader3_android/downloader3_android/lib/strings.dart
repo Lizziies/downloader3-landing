@@ -1,8 +1,3 @@
-/// 🌐 Bewusst im selben Stil wie das T-Dict der Desktop-App gehalten
-/// (main.py) — gleiche Keys, gleiche Formulierungen, damit App und
-/// Desktop-Version sich wie EIN Produkt anfühlen. Phase 1 deckt nur die
-/// Login-/Verifizierungs-Screens ab; weitere Keys kommen mit den
-/// nächsten Features dazu.
 class AppStrings {
   final Map<String, String> _de = {
     'welcome': 'Willkommen',
@@ -124,6 +119,9 @@ class AppStrings {
     'admin_make_helper_btn': 'Zum Helfer machen',
     'admin_unmake_helper_btn': 'Helfer zurückstufen',
     'admin_create_code_btn': 'Geschenk-Code erstellen',
+    'admin_new_code_label': 'Neuer Code',
+    'admin_copy_code': 'Kopieren',
+    'admin_code_copied': 'Code kopiert! 📋',
     'admin_accounts_title': 'Alle Konten',
     'admin_load_accounts': 'Konten laden',
     'admin_ok': 'Erledigt! ✓',
@@ -260,6 +258,9 @@ class AppStrings {
     'admin_make_helper_btn': 'Promote to helper',
     'admin_unmake_helper_btn': 'Demote helper',
     'admin_create_code_btn': 'Create gift code',
+    'admin_new_code_label': 'New code',
+    'admin_copy_code': 'Copy',
+    'admin_code_copied': 'Code copied! 📋',
     'admin_accounts_title': 'All accounts',
     'admin_load_accounts': 'Load accounts',
     'admin_ok': 'Done! ✓',
