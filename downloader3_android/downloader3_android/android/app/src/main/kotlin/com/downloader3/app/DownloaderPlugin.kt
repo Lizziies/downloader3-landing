@@ -152,10 +152,19 @@ return
 val url = call.argument<String>("url") ?: run {
 result.error("BAD_ARGS", "missing url", null); return
 }
-// "video" oder "audio" -- Audio nutzt FFmpeg zum Extrahieren als MP3.
-val mode = call.argument<String>("mode") ?: "video"
-// z. B. "1080", "720", "best" -- wird zu einem yt-dlp-Format-String.
-val quality = call.argument<String>("quality") ?: "best"
+// 🎯 Erweiterte Optionen (Pendant zu Plattform/Format/Auflösung am
+// Desktop, siehe download_tab.dart für die UI-Seite): isAudio ->
+// Tonspur extrahieren statt Video; format -> Zielendung (mp3/wav/
+// m4a/aac/flac/ogg für Audio, mp4/webm/mkv/mov für Video), "auto"
+// oder leer fällt auf mp4 bzw. mp3 zurück; height -> maximale
+// Video-Höhe in Pixeln (720, 1080, ...) oder null/0 für "beste
+// verfügbare" Qualität; playlist -> ganze Playlist/Kanal statt nur
+// des einen verlinkten Videos.
+val isAudio = call.argument<Boolean>("isAudio") ?: false
+val formatArg = call.argument<String>("format") ?: ""
+val format = if (formatArg.isNotBlank()) formatArg else (if (isAudio) "mp3" else "mp4")
+val height = call.argument<Int>("height")
+val playlist = call.argument<Boolean>("playlist") ?: false
 val processId = UUID.randomUUID().toString()
 
 val outDir = File(context.getExternalFilesDir(null), "Downloads")
@@ -164,9 +173,18 @@ if (!outDir.exists()) outDir.mkdirs()
 val request = YoutubeDLRequest(url)
 // 📁 Titel-basierter Dateiname, auf 150 Zeichen gekappt -- manche
 // Videotitel sind sehr lang und würden sonst an Dateisystem-
-// Grenzen (z. B. 255 Byte unter Android/exFAT) scheitern.
-request.addOption("-o", outDir.absolutePath + "/%(title).150s.%(ext)s")
+// Grenzen (z. B. 255 Byte unter Android/exFAT) scheitern. Bei
+// Playlist/Kanal-Downloads kommt zusätzlich der Index dazu, damit
+// nicht jede Folge dieselbe Datei überschreibt (Pendant zum
+// playlist_index-Suffix in _download_media() am Desktop).
+val nameTemplate = if (playlist) {
+"%(title).150s_%(playlist_index)s.%(ext)s"
+} else {
+"%(title).150s.%(ext)s"
+}
+request.addOption("-o", outDir.absolutePath + "/" + nameTemplate)
 request.addOption("--no-mtime")
+request.addOption(if (playlist) "--yes-playlist" else "--no-playlist")
 // 🐛 BUGFIX: ohne diese Optionen kann ein einzelner hängender
 // Netzwerk-Request (z. B. YouTube reagiert langsam/gar nicht auf
 // die Info-Extraktion) den gesamten Download für viele Minuten
@@ -180,10 +198,10 @@ request.addOption("--socket-timeout", "30")
 request.addOption("--retries", "5")
 request.addOption("--fragment-retries", "5")
 
-if (mode == "audio") {
+if (isAudio) {
 request.addOption("-f", "bestaudio/best")
 request.addOption("-x")
-request.addOption("--audio-format", "mp3")
+request.addOption("--audio-format", format)
 } else {
 // 📐 Format-String bewusst nach demselben Muster wie im
 // offiziellen Beispiel der Bibliothek aufgebaut (siehe
@@ -192,14 +210,21 @@ request.addOption("--audio-format", "mp3")
 // Audiospur separat zu holen und zusammenzuführen (braucht
 // FFmpeg, ist bereits initialisiert), mit zwei Rückfallstufen
 // für Plattformen, bei denen das nicht klappt. Die optionale
-// Höhenbegrenzung (z. B. "<=720") wird an "bestvideo"
-// angehängt, wenn keine "beste" Qualität gewählt wurde.
-val heightFilter = if (quality == "best") "" else "[height<=$quality]"
+// Höhenbegrenzung wird an "bestvideo" angehängt, wenn eine
+// konkrete Auflösung (statt "beste") gewählt wurde.
+val heightFilter = if (height == null || height <= 0) "" else "[height<=$height]"
 request.addOption(
 "-f",
 "bestvideo$heightFilter[ext=mp4]+bestaudio[ext=m4a]/" +
 "best$heightFilter[ext=mp4]/best$heightFilter/best"
 )
+// 🎞️ Falls ein anderer Ziel-Container als mp4 gewünscht ist
+// (webm/mkv/mov), wird NACH dem Download remuxt statt die
+// Format-Auswahl selbst einzuschränken -- das hält die bewährte
+// "bestvideo+bestaudio"-Fallback-Kette oben intakt.
+if (format != "auto" && format != "mp4") {
+request.addOption("--remux-video", format)
+}
 }
 
 // 📸 Vor dem Download merken, welche Dateien schon im Ordner
@@ -241,6 +266,7 @@ mapOf(
 "event" to "done",
 "outputDir" to outDir.absolutePath,
 "outputFile" to (newFile?.absolutePath ?: outDir.absolutePath),
+"size" to (newFile?.length() ?: 0L),
 )
 )
 result.success(processId)
