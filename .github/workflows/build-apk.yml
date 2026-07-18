@@ -12,6 +12,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: downloader3_android
     steps:
       - uses: actions/checkout@v4
 
@@ -58,13 +61,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: downloader3-apk
-          path: out/*.apk
+          path: downloader3_android/out/*.apk
 
       - name: Attach APK to GitHub Release
         if: startsWith(github.ref, 'refs/tags/android-v')
         uses: softprops/action-gh-release@v2
         with:
-          files: out/*.apk
+          files: downloader3_android/out/*.apk
           tag_name: ${{ github.ref_name }}
           name: "Downloader<3 Android ${{ github.ref_name }}"
           body: |
