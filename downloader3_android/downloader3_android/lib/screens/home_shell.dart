@@ -13,10 +13,6 @@ import 'ai_studio_tab.dart';
 import 'settings_tab.dart';
 import 'admin_tab.dart';
 
-/// 🏠 Haupt-App nach dem Login — Navigation über eine Seitenleiste
-/// (Drawer), analog zur Sidebar am Desktop (screen_main() in main.py):
-/// Download, Premium, Datei senden, Helfer, KI-Studio, Einstellungen,
-/// und (nur für die beiden Owner-E-Mails) Admin.
 class HomeShell extends StatefulWidget {
   final AppState state;
   const HomeShell({super.key, required this.state});
@@ -39,9 +35,6 @@ class _HomeShellState extends State<HomeShell> {
   }
 
   Future<void> _initUpdateCheck() async {
-    // 📌 Liest die ECHTE App-Version direkt aus dem Build (pubspec.yaml
-    // -> package_info_plus), statt eine Versionsnummer hier zusätzlich
-    // von Hand zu pflegen und riskieren, dass sie mal auseinanderläuft.
     final info = await PackageInfo.fromPlatform();
     final u = await checkForUpdate(info.version);
     if (mounted) setState(() => update = u);
@@ -86,15 +79,25 @@ class _HomeShellState extends State<HomeShell> {
             children: [
               Padding(
                 padding: const EdgeInsets.all(20),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('💜', style: TextStyle(fontSize: 26)),
-                    const SizedBox(width: 10),
-                    Text(st.t('home_title'),
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: st.accent.main)),
+                    Row(
+                      children: [
+                        const Text('💜', style: TextStyle(fontSize: 26)),
+                        const SizedBox(width: 10),
+                        Text(st.t('home_title'),
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: st.accent.main)),
+                      ],
+                    ),
+                    if (st.currentEmail != null) ...[
+                      const SizedBox(height: 6),
+                      Text(st.currentEmail!,
+                          style: const TextStyle(fontSize: 12, color: kMuted)),
+                    ],
                   ],
                 ),
               ),
