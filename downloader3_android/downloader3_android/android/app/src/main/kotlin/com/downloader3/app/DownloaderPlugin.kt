@@ -133,7 +133,7 @@ class DownloaderPlugin(private val context: Context) : FlutterPlugin,
                 // Gerät geprüft wurde -- lieber hier auf Nummer sicher
                 // gehen, als einen Kompilierfehler wegen eines geratenen
                 // Feldnamens zu riskieren.
-                val map = HashMap<String, Any?>()
+                val map = HashMap<String, Any>>()
                 map["title"] = info.title
                 mainHandler.post { result.success(map) }
             } catch (e: Exception) {
@@ -167,6 +167,18 @@ class DownloaderPlugin(private val context: Context) : FlutterPlugin,
         // Grenzen (z. B. 255 Byte unter Android/exFAT) scheitern.
         request.addOption("-o", outDir.absolutePath + "/%(title).150s.%(ext)s")
         request.addOption("--no-mtime")
+        // 🐛 BUGFIX: ohne diese Optionen kann ein einzelner hängender
+        // Netzwerk-Request (z. B. YouTube reagiert langsam/gar nicht auf
+        // die Info-Extraktion) den gesamten Download für viele Minuten
+        // einfrieren, bevor irgendein Fehler zurückkommt -- das war exakt
+        // das gemeldete Verhalten ("0% Fortschritt, Fehler erst nach 10
+        // Minuten"). Ein Socket-Timeout + begrenzte, aber vorhandene
+        // Wiederholungsversuche sorgen dafür, dass ein einzelner
+        // hängender Versuch nach spätestens ~30s abbricht und yt-dlp es
+        // stattdessen mehrfach neu versucht, statt endlos zu warten.
+        request.addOption("--socket-timeout", "30")
+        request.addOption("--retries", "5")
+        request.addOption("--fragment-retries", "5")
 
         if (mode == "audio") {
             request.addOption("-f", "bestaudio/best")
@@ -190,6 +202,13 @@ class DownloaderPlugin(private val context: Context) : FlutterPlugin,
             )
         }
 
+        // 📸 Vor dem Download merken, welche Dateien schon im Ordner
+        // liegen, damit wir nach Abschluss die NEU hinzugekommene Datei
+        // erkennen können (statt nur den -- immer gleichen -- Ordner zu
+        // melden). Fällt auf den Ordner zurück, falls sich das aus
+        // irgendeinem Grund nicht bestimmen lässt.
+        val beforeFiles = outDir.listFiles()?.map { it.absolutePath }?.toSet() ?: emptySet()
+
         Thread {
             try {
                 mainHandler.post {
@@ -210,12 +229,18 @@ class DownloaderPlugin(private val context: Context) : FlutterPlugin,
                         )
                     }
                 }
+                val afterFiles = outDir.listFiles() ?: emptyArray()
+                val newFile = afterFiles
+                    .filter { !beforeFiles.contains(it.absolutePath) }
+                    .maxByOrNull { it.lastModified() }
+                    ?: afterFiles.maxByOrNull { it.lastModified() }
                 mainHandler.post {
                     eventSink?.success(
                         mapOf(
                             "processId" to processId,
                             "event" to "done",
                             "outputDir" to outDir.absolutePath,
+                            "outputFile" to (newFile?.absolutePath ?: outDir.absolutePath),
                         )
                     )
                     result.success(processId)
