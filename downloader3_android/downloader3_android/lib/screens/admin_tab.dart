@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../app_state.dart';
 import '../theme.dart';
 
-/// 👑 Pendant zu page_admin() in main.py — nur für die beiden
-/// OWNER_EMAILS sichtbar (siehe constants.dart + home_shell.dart), und
-/// selbst dann erst nach einer erfolgreichen /api/verify-owner-Prüfung.
-/// JEDE einzelne Aktion hier schickt zusätzlich das Owner-Passwort mit
-/// (server-seitige Prüfung, siehe app.py) — der lokale E-Mail-Check ist
-/// nur fürs Ein-/Ausblenden im Menü, keine echte Zugriffskontrolle.
 class AdminTab extends StatefulWidget {
   final AppState state;
   const AdminTab({super.key, required this.state});
@@ -25,6 +20,7 @@ class _AdminTabState extends State<AdminTab> {
   Color msgColor = kMuted;
   bool busy = false;
   List<Map<String, dynamic>> accounts = [];
+  String? lastCreatedCode;
 
   AppState get st => widget.state;
 
@@ -63,6 +59,26 @@ class _AdminTabState extends State<AdminTab> {
       if (r['ok'] == true) {
         msg = st.t('admin_ok');
         msgColor = const Color(0xFF34D399);
+      } else {
+        msg = '✗ ${r['error'] ?? ''}';
+        msgColor = const Color(0xFFF87171);
+      }
+    });
+  }
+
+  Future<void> _createCode() async {
+    final pw = st.ownerPassword;
+    if (pw == null) return;
+    setState(() {
+      busy = true;
+      msg = null;
+      lastCreatedCode = null;
+    });
+    final r = await st.api.adminCreateCode(pw, _days);
+    setState(() {
+      busy = false;
+      if (r['ok'] == true) {
+        lastCreatedCode = (r['code'] ?? '').toString();
       } else {
         msg = '✗ ${r['error'] ?? ''}';
         msgColor = const Color(0xFFF87171);
@@ -193,13 +209,54 @@ class _AdminTabState extends State<AdminTab> {
                 child: Text(st.t('admin_unmake_helper_btn')),
               ),
               OutlinedButton(
-                onPressed: busy
-                    ? null
-                    : () => _runAction((pw) => st.api.adminCreateCode(pw, _days)),
+                onPressed: busy ? null : _createCode,
                 child: Text(st.t('admin_create_code_btn')),
               ),
             ],
           ),
+          if (lastCreatedCode != null) ...[
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: st.accent.main.withOpacity(0.12),
+                border: Border.all(color: st.accent.main, width: 1.5),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(st.t('admin_new_code_label'),
+                            style: const TextStyle(
+                                color: kMuted, fontSize: 11)),
+                        const SizedBox(height: 4),
+                        SelectableText(lastCreatedCode!,
+                            style: TextStyle(
+                                color: st.accent.main,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.2)),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: st.t('admin_copy_code'),
+                    icon: Icon(Icons.copy_rounded, color: st.accent.main),
+                    onPressed: () {
+                      Clipboard.setData(
+                          ClipboardData(text: lastCreatedCode!));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(st.t('admin_code_copied'))),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
           const Divider(color: kCardDark2, height: 32),
           Text(st.t('admin_accounts_title'),
               style: const TextStyle(
@@ -210,14 +267,59 @@ class _AdminTabState extends State<AdminTab> {
             child: Text(st.t('admin_load_accounts')),
           ),
           const SizedBox(height: 10),
-          ...accounts.map((a) => ListTile(
-                dense: true,
-                title: Text(a['email'] ?? '',
-                    style: const TextStyle(color: Colors.white)),
-                subtitle: Text(
-                    'premium: ${a['premium_until'] ?? '-'}  ·  role: ${a['role'] ?? '-'}',
-                    style: const TextStyle(color: kMuted, fontSize: 11)),
-              )),
+          ...accounts.map((a) {
+            final isPremium = (a['premium_until'] ?? '').toString().isNotEmpty;
+            final role = (a['role'] ?? '').toString();
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: kCardDark,
+                border: Border.all(color: kCardDark2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(a['email'] ?? '',
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13)),
+                        const SizedBox(height: 3),
+                        Text(
+                            'premium: ${a['premium_until'] ?? '-'}',
+                            style:
+                                const TextStyle(color: kMuted, fontSize: 11)),
+                      ],
+                    ),
+                  ),
+                  if (isPremium)
+                    const Padding(
+                      padding: EdgeInsets.only(right: 6),
+                      child: Text('⭐', style: TextStyle(fontSize: 14)),
+                    ),
+                  if (role.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: st.accent.main.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(role,
+                          style: TextStyle(
+                              color: st.accent.main,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600)),
+                    ),
+                ],
+              ),
+            );
+          }),
         ],
       ),
     );
