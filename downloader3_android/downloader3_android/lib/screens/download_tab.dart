@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:open_filex/open_filex.dart';
+import 'package:path_provider/path_provider.dart';
 import '../app_state.dart';
 import '../native_downloader.dart';
 import '../theme.dart';
@@ -559,17 +559,30 @@ rows.add(
 }
 final csvText = rows.join('\n');
 try {
-final path = await getSavePath(
-suggestedName: 'downloader3_verlauf.csv',
-acceptedTypeGroups: const [
-XTypeGroup(label: 'CSV', extensions: ['csv']),
-],
-);
-if (path == null) return;
-await File(path).writeAsString(csvText);
+// 📱 file_selector's Speichern-Dialog wird auf Android NICHT unterstützt
+// (nur Desktop/Web) -- deshalb wird die CSV, genau wie die Downloads
+// selbst, direkt in den App-Ordner geschrieben (kein Dialog nötig).
+final base = await getExternalStorageDirectory() ??
+await getApplicationDocumentsDirectory();
+final outDir = Directory('${base.path}/Downloads');
+if (!await outDir.exists()) {
+await outDir.create(recursive: true);
+}
+final fileName =
+'downloader3_verlauf_${DateTime.now().millisecondsSinceEpoch}.csv';
+final file = File('${outDir.path}/$fileName');
+await file.writeAsString(csvText);
 if (!mounted) return;
 ScaffoldMessenger.of(context).showSnackBar(
-SnackBar(content: Text(isDe ? '✓ CSV gespeichert.' : '✓ CSV saved.')),
+SnackBar(
+content: Text(isDe
+? '✓ CSV gespeichert: $fileName'
+: '✓ CSV saved: $fileName'),
+action: SnackBarAction(
+label: isDe ? 'Öffnen' : 'Open',
+onPressed: () => OpenFilex.open(file.path),
+),
+),
 );
 } catch (e) {
 if (!mounted) return;
@@ -786,7 +799,7 @@ if (!st.isPremium) ...[
 const SizedBox(height: 8),
 Text(
 isDe
-? '🔒 Nur MP4 verfügbar — hol dir Premium für alle Formate!'
+? '🔒 Nur MP4 verfügbar — hol dir Premium für alle Formate!%
 : '🔒 Only MP4 available — get Premium for all formats!',
 style: const TextStyle(color: Color(0xFFFBBF24), fontSize: 11),
 ),
