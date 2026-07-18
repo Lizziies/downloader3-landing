@@ -27,6 +27,7 @@ class DownloadTab extends StatefulWidget {
 
 class _DownloadTabState extends State<DownloadTab> {
   final urlCtl = TextEditingController();
+  final historySearchCtl = TextEditingController();
   String mode = 'video'; // 'video' oder 'audio'
   String quality = 'best'; // 'best', '1080', '720', '480'
   bool initializing = true;
@@ -51,6 +52,7 @@ class _DownloadTabState extends State<DownloadTab> {
   @override
   void dispose() {
     _sub?.cancel();
+    historySearchCtl.dispose();
     super.dispose();
   }
 
@@ -75,6 +77,13 @@ class _DownloadTabState extends State<DownloadTab> {
         });
         break;
       case 'done':
+        // 🕓 Ins Verlauf eintragen -- bevorzugt die konkrete Datei
+        // (outputFile), falls das native Plugin sie melden konnte,
+        // sonst den Ordner als Rückfall (ältere Plugin-Version).
+        final file = (e['outputFile'] as String?) ?? (e['outputDir'] as String?);
+        if (file != null) {
+          st.store.addHistoryEntry(file: file, url: urlCtl.text.trim());
+        }
         setState(() {
           downloading = false;
           progress = 1.0;
@@ -88,6 +97,120 @@ class _DownloadTabState extends State<DownloadTab> {
         });
         break;
     }
+  }
+
+  void _useFavorite(String url) {
+    setState(() => urlCtl.text = url);
+  }
+
+  Future<void> _showFavoritesDialog() async {
+    final nameCtl = TextEditingController();
+    final urlFieldCtl = TextEditingController(text: urlCtl.text.trim());
+    String? favError;
+
+    await showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(builder: (ctx, setDialogState) {
+          final favs = st.store.favorites;
+          return AlertDialog(
+            backgroundColor: kCardDark,
+            title: Text('⭐ ${st.t('favorites')}',
+                style: TextStyle(color: st.accent.main)),
+            content: SizedBox(
+              width: 360,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TextField(
+                    controller: urlFieldCtl,
+                    decoration:
+                        InputDecoration(hintText: st.t('favorite_url_ph')),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: nameCtl,
+                          decoration: InputDecoration(
+                              hintText: st.t('favorite_name_ph')),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: () async {
+                          final url = urlFieldCtl.text.trim();
+                          if (url.isEmpty) {
+                            setDialogState(
+                                () => favError = st.t('favorite_url_missing'));
+                            return;
+                          }
+                          final name = nameCtl.text.trim().isNotEmpty
+                              ? nameCtl.text.trim()
+                              : (url.length > 40 ? url.substring(0, 40) : url);
+                          await st.store.addFavorite(name, url);
+                          nameCtl.clear();
+                          setDialogState(() => favError = null);
+                        },
+                        child: Text(st.t('add_favorite')),
+                      ),
+                    ],
+                  ),
+                  if (favError != null) ...[
+                    const SizedBox(height: 4),
+                    Text(favError!,
+                        style: const TextStyle(
+                            color: Color(0xFFF87171), fontSize: 11)),
+                  ],
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: 240,
+                    child: favs.isEmpty
+                        ? Center(
+                            child: Text(st.t('no_favorites'),
+                                style: const TextStyle(color: kMuted)))
+                        : ListView.builder(
+                            itemCount: favs.length,
+                            itemBuilder: (ctx, i) {
+                              final f = favs[i];
+                              return ListTile(
+                                dense: true,
+                                title: Text('🔗 ${f['name']}',
+                                    style:
+                                        const TextStyle(color: Colors.white),
+                                    overflow: TextOverflow.ellipsis),
+                                onTap: () {
+                                  _useFavorite(f['url'] ?? '');
+                                  Navigator.of(ctx).pop();
+                                },
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.close,
+                                      color: Color(0xFFF87171), size: 18),
+                                  onPressed: () async {
+                                    await st.store.removeFavorite(f['url'] ?? '');
+                                    setDialogState(() {});
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        });
+      },
+    );
+    if (mounted) setState(() {});
   }
 
   Future<void> _startDownload() async {
@@ -155,9 +278,23 @@ class _DownloadTabState extends State<DownloadTab> {
               ),
             )
           else ...[
-            TextField(
-              controller: urlCtl,
-              decoration: InputDecoration(hintText: st.t('download_url_ph')),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: urlCtl,
+                    decoration:
+                        InputDecoration(hintText: st.t('download_url_ph')),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                IconButton(
+                  tooltip: st.t('favorites'),
+                  icon: Icon(Icons.star_rounded, color: st.accent.main),
+                  onPressed: _showFavoritesDialog,
+                ),
+              ],
             ),
             const SizedBox(height: 12),
             Row(
@@ -237,9 +374,105 @@ class _DownloadTabState extends State<DownloadTab> {
                 ),
               ),
             ],
+            const Divider(color: kCardDark2, height: 40),
+            _buildHistorySection(),
           ],
         ],
       ),
     );
+  }
+
+  // 🕓 Verlauf mit Such-/Filterfunktion -- Pendant zum History-Abschnitt
+  // unten in page_download() am Desktop (Sortierung neueste zuerst kommt
+  // schon aus AuthStore.history, wird hier also nicht nochmal gedreht).
+  Widget _buildHistorySection() {
+    final all = st.store.history;
+    final query = historySearchCtl.text.trim().toLowerCase();
+    final filtered = query.isEmpty
+        ? all
+        : all.where((h) {
+            final name = _historyName(h['file'] as String? ?? '');
+            return name.toLowerCase().contains(query);
+          }).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text('🕓 ${st.t('history')}',
+            style: const TextStyle(
+                color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+        const SizedBox(height: 8),
+        if (all.isNotEmpty) ...[
+          TextField(
+            controller: historySearchCtl,
+            decoration: InputDecoration(hintText: st.t('history_search_ph')),
+            onChanged: (_) => setState(() {}),
+          ),
+          const SizedBox(height: 8),
+        ],
+        if (all.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text(st.t('history_empty'),
+                style: const TextStyle(color: kMuted)),
+          )
+        else if (filtered.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text(st.t('history_no_match'),
+                style: const TextStyle(color: kMuted)),
+          )
+        else
+          ...filtered.take(30).map((h) {
+            final path = h['file'] as String? ?? '';
+            final name = _historyName(path);
+            final date = (h['date'] as String? ?? '').split('T').first;
+            return Container(
+              margin: const EdgeInsets.only(bottom: 6),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: kCardDark,
+                border: Border.all(color: kCardDark2),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('✓  $name',
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 13),
+                            overflow: TextOverflow.ellipsis),
+                        if (date.isNotEmpty)
+                          Text(date,
+                              style:
+                                  const TextStyle(color: kMuted, fontSize: 10)),
+                      ],
+                    ),
+                  ),
+                  if (path.isNotEmpty)
+                    IconButton(
+                      tooltip: st.t('open_folder'),
+                      icon: Icon(Icons.folder_open,
+                          color: st.accent.main, size: 20),
+                      onPressed: () => OpenFilex.open(path),
+                    ),
+                ],
+              ),
+            );
+          }),
+      ],
+    );
+  }
+
+  String _historyName(String path) {
+    if (path.isEmpty) return '';
+    final parts = path.replaceAll('\\', '/').split('/');
+    var name = parts.isNotEmpty ? parts.last : path;
+    if (name.length > 46) name = '${name.substring(0, 43)}...';
+    return name;
   }
 }
