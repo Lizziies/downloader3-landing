@@ -1,17 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Internet: Login/Premium/Downloads -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <!-- Für den späteren Downloader-Teil (Videos/Audio auf das Gerät
-         speichern) -- ab Android 13 (API 33) reicht der scoped-storage-
-         Zugriff über den System-Dateiwähler, ältere Versionen brauchen
-         die klassische Berechtigung. -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
-    <!-- Für die Selbst-Update-Installation (APK von GitHub laden und
-         direkt installieren, analog zum robocopy-Updater am Desktop). -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <application
@@ -21,11 +14,6 @@
         android:usesCleartextTraffic="false"
         android:requestLegacyExternalStorage="true"
         android:extractNativeLibs="true">
-        <!-- 🎬 requestLegacyExternalStorage + extractNativeLibs: von
-             youtubedl-android (Download-Motor, siehe DownloaderPlugin.kt)
-             ausdrücklich so empfohlen -- ohne extractNativeLibs="true"
-             findet Android die mitgebrachten Python/yt-dlp-Binärdateien
-             auf manchen Geräten nicht zuverlässig. -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -46,7 +34,6 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
-        <!-- FileProvider für die APK-Selbstinstallation aus dem Download -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
