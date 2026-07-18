@@ -29,13 +29,21 @@ jobs:
         run: flutter pub get
 
       - name: Restore signing keystore (if configured)
-        if: ${{ secrets.DL3_KEYSTORE_BASE64 != '' }}
+        env:
+          DL3_KEYSTORE_BASE64: ${{ secrets.DL3_KEYSTORE_BASE64 }}
+          DL3_KEYSTORE_PASSWORD: ${{ secrets.DL3_KEYSTORE_PASSWORD }}
+          DL3_KEY_ALIAS: ${{ secrets.DL3_KEY_ALIAS }}
+          DL3_KEY_PASSWORD: ${{ secrets.DL3_KEY_PASSWORD }}
         run: |
-          echo "${{ secrets.DL3_KEYSTORE_BASE64 }}" | base64 -d > /tmp/dl3-release.keystore
-          echo "DL3_KEYSTORE_PATH=/tmp/dl3-release.keystore" >> "$GITHUB_ENV"
-          echo "DL3_KEYSTORE_PASSWORD=${{ secrets.DL3_KEYSTORE_PASSWORD }}" >> "$GITHUB_ENV"
-          echo "DL3_KEY_ALIAS=${{ secrets.DL3_KEY_ALIAS }}" >> "$GITHUB_ENV"
-          echo "DL3_KEY_PASSWORD=${{ secrets.DL3_KEY_PASSWORD }}" >> "$GITHUB_ENV"
+          if [ -n "$DL3_KEYSTORE_BASE64" ]; then
+            echo "$DL3_KEYSTORE_BASE64" | base64 -d > /tmp/dl3-release.keystore
+            echo "DL3_KEYSTORE_PATH=/tmp/dl3-release.keystore" >> "$GITHUB_ENV"
+            echo "DL3_KEYSTORE_PASSWORD=$DL3_KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+            echo "DL3_KEY_ALIAS=$DL3_KEY_ALIAS" >> "$GITHUB_ENV"
+            echo "DL3_KEY_PASSWORD=$DL3_KEY_PASSWORD" >> "$GITHUB_ENV"
+          else
+            echo "Kein eigener Signatur-Schlüssel hinterlegt, nutze Debug-Signatur."
+          fi
 
       - name: Build release APK
         run: flutter build apk --release
