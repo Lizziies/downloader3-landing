@@ -4,12 +4,6 @@ import 'package:crypto/crypto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'api_client.dart';
 
-/// 📦 Lokaler Speicher auf dem Gerät (SharedPreferences) — Pendant zur
-/// JSON-Datei der Desktop-App (Store-Klasse in main.py). Das eigentliche
-/// Konto (E-Mail+Passwort+Premium) lebt server-seitig im gemeinsamen
-/// premium-backend, hier wird nur der lokale Zustand für DIESES Gerät
-/// gehalten (eingeloggt bleiben, Sprache, Akzentfarbe, Verifizierungs-
-/// Code-Zwischenspeicher).
 class AuthStore {
   static const _kEmail = 'current_email';
   static const _kLang = 'language';
@@ -24,15 +18,12 @@ class AuthStore {
   static Future<AuthStore> load() async =>
       AuthStore(await SharedPreferences.getInstance());
 
-  String get language => prefs.getString(_kLang) ?? 'de';
+  String get language => prefs.getString(_kLang) ?? 'en';
   set language(String v) => prefs.setString(_kLang, v);
 
   String get accent => prefs.getString(_kAccent) ?? 'Pink';
   set accent(String v) => prefs.setString(_kAccent, v);
 
-  // 🌍 Standard zeigt auf denselben Server, den auch die Desktop-App
-  // per Voreinstellung nutzt (premium-backend auf Render) — kann in den
-  // Einstellungen später überschrieben werden, genau wie am Desktop.
   String get backendUrl =>
       prefs.getString(_kBackend) ?? 'https://downloader3-backend.onrender.com';
   set backendUrl(String v) => prefs.setString(_kBackend, v);
@@ -76,12 +67,9 @@ class AuthStore {
     await prefs.remove(_kPremiumRole);
   }
 
-  // --- Verifizierungs-Code (lokal pro Gerät, wie am Desktop) ------------
   String _vKeyHash(String email) => 'vcode_hash_$email';
   String _vKeyExp(String email) => 'vcode_exp_$email';
 
-  /// Erzeugt einen neuen 6-stelligen Code, speichert dessen Hash lokal
-  /// (15 Minuten gültig) und gibt den Klartext-Code zum Versand zurück.
   String startVerification(String email) {
     final code = (100000 + Random.secure().nextInt(900000)).toString();
     final hash = sha256.convert(utf8.encode('vcode::$code')).toString();
@@ -91,8 +79,6 @@ class AuthStore {
     return code;
   }
 
-  /// Gibt 'ok' / 'expired' / 'wrong' zurück — analog zu
-  /// Store.check_verification() am Desktop.
   String checkVerification(String email, String code) {
     final hash = prefs.getString(_vKeyHash(email));
     final expIso = prefs.getString(_vKeyExp(email));
