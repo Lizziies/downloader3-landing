@@ -1,3 +1,8 @@
+/// 🌐 Bewusst im selben Stil wie das T-Dict der Desktop-App gehalten
+/// (main.py) — gleiche Keys, gleiche Formulierungen, damit App und
+/// Desktop-Version sich wie EIN Produkt anfühlen. Phase 1 deckt nur die
+/// Login-/Verifizierungs-Screens ab; weitere Keys kommen mit den
+/// nächsten Features dazu.
 class AppStrings {
   final Map<String, String> _de = {
     'welcome': 'Willkommen',
@@ -136,6 +141,17 @@ class AppStrings {
     'download_url_ph': 'Link einfügen (YouTube, TikTok, Instagram, ...)',
     'download_not_ready_title': 'Noch nicht verfügbar 🚧',
     'download_not_ready_desc': 'Der eigentliche Download-Motor (yt-dlp) braucht eine eigene native Anbindung fürs Handy — das ist der letzte große Baustein und kommt als eigene, sauber getestete Runde. Alles andere in der App funktioniert schon jetzt echt, gegen denselben Server wie die Windows-App.',
+    'favorites': 'Favoriten',
+    'favorite_url_ph': 'Link (URL)',
+    'favorite_name_ph': 'Name (optional)',
+    'no_favorites': 'Noch keine Favoriten gespeichert.',
+    'add_favorite': 'Hinzufügen',
+    'favorite_url_missing': 'Bitte zuerst einen Link eingeben.',
+    'history': 'Letzte Downloads',
+    'history_search_ph': '🔍 Verlauf durchsuchen...',
+    'history_no_match': 'Keine Treffer.',
+    'history_empty': 'Noch keine abgeschlossenen Downloads.',
+    'open_folder': 'Ordner öffnen',
   };
 
   final Map<String, String> _en = {
@@ -275,6 +291,17 @@ class AppStrings {
     'download_url_ph': 'Paste a link (YouTube, TikTok, Instagram, ...)',
     'download_not_ready_title': 'Not available yet 🚧',
     'download_not_ready_desc': "The actual download engine (yt-dlp) needs its own native integration for mobile — that's the last big building block and is coming as its own, properly tested round. Everything else in the app already works for real, against the same server as the Windows app.",
+    'favorites': 'Favorites',
+    'favorite_url_ph': 'Link (URL)',
+    'favorite_name_ph': 'Name (optional)',
+    'no_favorites': 'No favorites saved yet.',
+    'add_favorite': 'Add',
+    'favorite_url_missing': 'Please enter a link first.',
+    'history': 'Recent downloads',
+    'history_search_ph': '🔍 Search history...',
+    'history_no_match': 'No matches.',
+    'history_empty': 'No completed downloads yet.',
+    'open_folder': 'Open folder',
   };
 
   String lang;
