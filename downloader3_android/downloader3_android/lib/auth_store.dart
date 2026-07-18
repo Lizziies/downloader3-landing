@@ -4,6 +4,12 @@ import 'package:crypto/crypto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'api_client.dart';
 
+/// 📦 Lokaler Speicher auf dem Gerät (SharedPreferences) — Pendant zur
+/// JSON-Datei der Desktop-App (Store-Klasse in main.py). Das eigentliche
+/// Konto (E-Mail+Passwort+Premium) lebt server-seitig im gemeinsamen
+/// premium-backend, hier wird nur der lokale Zustand für DIESES Gerät
+/// gehalten (eingeloggt bleiben, Sprache, Akzentfarbe, Verifizierungs-
+/// Code-Zwischenspeicher).
 class AuthStore {
   static const _kEmail = 'current_email';
   static const _kLang = 'language';
@@ -18,12 +24,18 @@ class AuthStore {
   static Future<AuthStore> load() async =>
       AuthStore(await SharedPreferences.getInstance());
 
+  // 🌍 Standardmäßig Englisch für alle -- ausdrücklicher Nutzerwunsch,
+  // unabhängig vom Geräte-Locale. In den Einstellungen jederzeit auf
+  // Deutsch umschaltbar, wird dann dauerhaft gespeichert.
   String get language => prefs.getString(_kLang) ?? 'en';
   set language(String v) => prefs.setString(_kLang, v);
 
   String get accent => prefs.getString(_kAccent) ?? 'Pink';
   set accent(String v) => prefs.setString(_kAccent, v);
 
+  // 🌍 Standard zeigt auf denselben Server, den auch die Desktop-App
+  // per Voreinstellung nutzt (premium-backend auf Render) — kann in den
+  // Einstellungen später überschrieben werden, genau wie am Desktop.
   String get backendUrl =>
       prefs.getString(_kBackend) ?? 'https://downloader3-backend.onrender.com';
   set backendUrl(String v) => prefs.setString(_kBackend, v);
@@ -67,9 +79,92 @@ class AuthStore {
     await prefs.remove(_kPremiumRole);
   }
 
+  // --- ⭐ Favoriten (Pendant zu store.data["favorites"] am Desktop) -----
+  static const _kFavorites = 'favorites';
+
+  List<Map<String, String>> get favorites {
+    final raw = prefs.getString(_kFavorites);
+    if (raw == null || raw.isEmpty) return [];
+    try {
+      final list = jsonDecode(raw) as List;
+      return list
+          .map((e) => (e as Map).map(
+              (k, v) => MapEntry(k.toString(), v.toString())))
+          .toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<void> _saveFavorites(List<Map<String, String>> favs) async {
+    await prefs.setString(_kFavorites, jsonEncode(favs));
+  }
+
+  /// Fügt einen Favoriten hinzu (überspringt, falls die URL schon
+  /// gespeichert ist -- exakt wie am Desktop).
+  Future<void> addFavorite(String name, String url) async {
+    final favs = favorites;
+    if (favs.any((f) => f['url'] == url)) return;
+    favs.add({'name': name, 'url': url});
+    await _saveFavorites(favs);
+  }
+
+  Future<void> removeFavorite(String url) async {
+    final favs = favorites..removeWhere((f) => f['url'] == url);
+    await _saveFavorites(favs);
+  }
+
+  // --- 🕓 Verlauf (Pendant zu store.data["history"] am Desktop) ---------
+  static const _kHistory = 'history';
+
+  /// Neueste zuerst (schon in Anzeige-Reihenfolge, anders als am
+  /// Desktop, wo erst beim Rendern umgedreht wird).
+  List<Map<String, dynamic>> get history {
+    final raw = prefs.getString(_kHistory);
+    if (raw == null || raw.isEmpty) return [];
+    try {
+      final list = jsonDecode(raw) as List;
+      return list
+          .map((e) => (e as Map).cast<String, dynamic>())
+          .toList()
+          .reversed
+          .toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// Merkt sich einen abgeschlossenen Download -- genau wie
+  /// Store.add_history() am Desktop, auf die letzten 200 Einträge
+  /// gekappt.
+  Future<void> addHistoryEntry(
+      {required String file, String? url}) async {
+    final raw = prefs.getString(_kHistory);
+    List list = [];
+    if (raw != null && raw.isNotEmpty) {
+      try {
+        list = jsonDecode(raw) as List;
+      } catch (_) {
+        list = [];
+      }
+    }
+    list.add({
+      'file': file,
+      'url': url ?? '',
+      'date': DateTime.now().toIso8601String(),
+    });
+    if (list.length > 200) {
+      list = list.sublist(list.length - 200);
+    }
+    await prefs.setString(_kHistory, jsonEncode(list));
+  }
+
+  // --- Verifizierungs-Code (lokal pro Gerät, wie am Desktop) ------------
   String _vKeyHash(String email) => 'vcode_hash_$email';
   String _vKeyExp(String email) => 'vcode_exp_$email';
 
+  /// Erzeugt einen neuen 6-stelligen Code, speichert dessen Hash lokal
+  /// (15 Minuten gültig) und gibt den Klartext-Code zum Versand zurück.
   String startVerification(String email) {
     final code = (100000 + Random.secure().nextInt(900000)).toString();
     final hash = sha256.convert(utf8.encode('vcode::$code')).toString();
@@ -79,6 +174,8 @@ class AuthStore {
     return code;
   }
 
+  /// Gibt 'ok' / 'expired' / 'wrong' zurück — analog zu
+  /// Store.check_verification() am Desktop.
   String checkVerification(String email, String code) {
     final hash = prefs.getString(_vKeyHash(email));
     final expIso = prefs.getString(_vKeyExp(email));
