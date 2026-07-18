@@ -1,3 +1,9 @@
+plugins {
+    id "com.android.application"
+    id "org.jetbrains.kotlin.android"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
@@ -8,12 +14,6 @@ if (localPropertiesFile.exists()) {
 
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode') ?: '1'
 def flutterVersionName = localProperties.getProperty('flutter.versionName') ?: '1.0.0'
-
-plugins {
-    id "com.android.application"
-    id "org.jetbrains.kotlin.android"
-    id "dev.flutter.flutter-gradle-plugin"
-}
 
 android {
     namespace "com.downloader3.app"
@@ -30,15 +30,7 @@ android {
     }
 
     defaultConfig {
-        // 💜 Eigene, feste Paket-ID -- wichtig für den Update-Mechanismus:
-        // eine .apk mit anderer applicationId würde Android als "andere
-        // App" behandeln statt als Update, und die Installation über die
-        // bestehende App drüber lehnt Android dann ab.
         applicationId "com.downloader3.app"
-        // 🎬 youtubedl-android (Python+yt-dlp fürs Handy, siehe
-        // DownloaderPlugin.kt) bringt native Bibliotheken für diese vier
-        // Prozessor-Architekturen mit -- ohne diesen Filter würde Gradle
-        // eine .apk bauen, die auf mind. einer davon abstürzt.
         ndk {
             abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
         }
@@ -48,11 +40,6 @@ android {
         versionName flutterVersionName
     }
 
-    // 🔑 Release-Signatur: ohne eigenes Keystore signiert Gradle
-    // automatisch mit dem Debug-Key (siehe README-Hinweis zum ersten
-    // echten Release -- SOLLTE für Play Store/Weiterverteilung durch
-    // einen eigenen Keystore ersetzt werden, für "APK von der eigenen
-    // Webseite" reicht das erstmal, damit CI überhaupt baut).
     signingConfigs {
         release {
             if (System.getenv("DL3_KEYSTORE_PATH")) {
@@ -78,14 +65,6 @@ flutter {
     source '../..'
 }
 
-// 🎬 Der eigentliche Download-Motor: youtubedl-android bündelt Python +
-// yt-dlp fürs Handy (derselbe yt-dlp, den auch die Windows-App nutzt),
-// als fertige, gepflegte Bibliothek -- veröffentlicht direkt auf Maven
-// Central (kein zusätzliches JitPack-Repository nötig, siehe
-// android/build.gradle). Version + Koordinaten wurden VORHER über die
-// offizielle GitHub-README + Maven-Central-Seite geprüft (nicht
-// geraten), damit hier nicht derselbe Fehler passiert wie beim
-// ursprünglichen gofile.io-Umbau (falscher Endpunkt geraten -> 404).
 dependencies {
     def youtubedlAndroid = "0.18.1"
     implementation "io.github.junkfood02.youtubedl-android:library:$youtubedlAndroid"
