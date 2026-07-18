@@ -134,7 +134,7 @@ val info: VideoInfo = YoutubeDL.getInstance().getInfo(url)
 // gehen, als einen Kompilierfehler wegen eines geratenen
 // Feldnamens zu riskieren.
 val map = HashMap<String, Any>()
-map["title"] = info.title
+map["title"] = info.title ?: ""
 mainHandler.post { result.success(map) }
 } catch (e: Exception) {
 Log.w(TAG, "getInfo failed (non-fatal)", e)
