@@ -1,7 +1,7 @@
 name: downloader3
 description: "Downloader<3 — Android-Begleit-App (Login, Premium, Datei senden, Helfer-Tafel, KI-Studio, Admin, echter yt-dlp-Download-Motor)"
 publish_to: "none"
-version: 1.5.0+15
+version: 1.5.2+16
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
