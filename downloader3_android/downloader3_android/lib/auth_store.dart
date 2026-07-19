@@ -21,6 +21,10 @@ static const _kWifiPriority = 'wifi_priority';
 static const _kMobileDataAllowed = 'mobile_data_allowed';
   static const _kNotificationsEnabled = 'notifications_enabled';
   static const _kAutoBackupEnabled = 'auto_backup_enabled';
+  static const _kMatchingModeEnabled = 'matching_mode_enabled';
+  static const _kMatchingModeBaseColor = 'matching_mode_base_color';
+  static const _kFontFamily = 'font_family';
+  static const _kFontSizeScale = 'font_size_scale';
 
 final SharedPreferences prefs;
 AuthStore(this.prefs);
@@ -61,6 +65,32 @@ set mobileDataAllowed(bool v) => prefs.setBool(_kMobileDataAllowed, v);
 
   bool get autoBackupEnabled => prefs.getBool(_kAutoBackupEnabled) ?? false;
   set autoBackupEnabled(bool v) => prefs.setBool(_kAutoBackupEnabled, v);
+
+  // 🎨 Matching Mode (custom base color -> derived accent, siehe theme.dart
+  // generateMatchingAccent). matchingModeBaseColorValue speichert Color.value.
+  bool get matchingModeEnabled =>
+      prefs.getBool(_kMatchingModeEnabled) ?? false;
+  set matchingModeEnabled(bool v) =>
+      prefs.setBool(_kMatchingModeEnabled, v);
+
+  int? get matchingModeBaseColorValue =>
+      prefs.containsKey(_kMatchingModeBaseColor)
+          ? prefs.getInt(_kMatchingModeBaseColor)
+          : null;
+  set matchingModeBaseColorValue(int? v) {
+    if (v == null) {
+      prefs.remove(_kMatchingModeBaseColor);
+    } else {
+      prefs.setInt(_kMatchingModeBaseColor, v);
+    }
+  }
+
+  // 🔤 Schriftart & Größe (siehe theme.dart kFontOptions/resolveFontFamily).
+  String get fontFamily => prefs.getString(_kFontFamily) ?? 'Roboto';
+  set fontFamily(String v) => prefs.setString(_kFontFamily, v);
+
+  double get fontSizeScale => prefs.getDouble(_kFontSizeScale) ?? 1.0;
+  set fontSizeScale(double v) => prefs.setDouble(_kFontSizeScale, v);
 
 String? get currentEmail => prefs.getString(_kEmail);
 Future<void> setCurrentEmail(String? email) async {
