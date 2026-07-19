@@ -17,6 +17,8 @@ static const _kAccent = 'accent';
 static const _kBackend = 'backend_url';
 static const _kPremiumUntil = 'premium_until';
 static const _kPremiumRole = 'premium_role';
+static const _kWifiPriority = 'wifi_priority';
+static const _kMobileDataAllowed = 'mobile_data_allowed';
 
 final SharedPreferences prefs;
 AuthStore(this.prefs);
@@ -39,6 +41,18 @@ set accent(String v) => prefs.setString(_kAccent, v);
 String get backendUrl =>
 prefs.getString(_kBackend) ?? 'https://downloader3-backend.onrender.com';
 set backendUrl(String v) => prefs.setString(_kBackend, v);
+
+// 📶 WiFi-Priorität/Mobilfunk-Einstellungen (neue Downloader-
+// Vorab-Checks, siehe download_tab.dart): "wifiPriority" wird aktuell nur
+// als Präferenz gespeichert -- ohne eigenes Netzwerk-Binding (kein
+// öffentliches, einfaches API dafür in connectivity_plus) gibt es hier
+// nichts sinnvoll zu erzwingen; das Betriebssystem entscheidet ohnehin,
+// über welche Schnittstelle ein Request tatsächlich läuft.
+bool get wifiPriority => prefs.getBool(_kWifiPriority) ?? false;
+set wifiPriority(bool v) => prefs.setBool(_kWifiPriority, v);
+
+bool get mobileDataAllowed => prefs.getBool(_kMobileDataAllowed) ?? true;
+set mobileDataAllowed(bool v) => prefs.setBool(_kMobileDataAllowed, v);
 
 String? get currentEmail => prefs.getString(_kEmail);
 Future<void> setCurrentEmail(String? email) async {
