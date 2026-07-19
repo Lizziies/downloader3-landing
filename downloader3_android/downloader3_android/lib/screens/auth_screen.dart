@@ -14,7 +14,7 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  String mode = 'register';
+  String mode = 'login';
   final emailCtl = TextEditingController();
   final pwCtl = TextEditingController();
   String? error;
