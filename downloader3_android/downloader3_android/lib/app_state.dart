@@ -13,12 +13,46 @@ class AppState extends ChangeNotifier {
   final AuthStore store;
   AppState(this.store);
 
-  AppAccent get accent =>
-      kAccents.firstWhere((a) => a.name == store.accent,
-          orElse: () => kAccents[0]);
+AppAccent get accent {
+    if (store.matchingModeEnabled && store.matchingModeBaseColorValue != null) {
+      return generateMatchingAccent(Color(store.matchingModeBaseColorValue!));
+    }
+    return kAccents.firstWhere((a) => a.name == store.accent,
+        orElse: () => kAccents[0]);
+  }
 
   void setAccent(String name) {
+    store.matchingModeEnabled = false;
     store.accent = name;
+    notifyListeners();
+  }
+
+  // 🎨 Matching Mode: leitet aus einer frei gewählten Basisfarbe ein
+  // passendes Akzent-Paar ab (siehe theme.dart generateMatchingAccent) und
+  // macht es zum aktiven Akzent, ohne die vorherige Preset-Auswahl zu
+  // verlieren (store.accent bleibt unverändert, damit reset() dahin
+  // zurückkehren kann).
+  void setMatchingAccent(Color base) {
+    store.matchingModeBaseColorValue = base.value;
+    store.matchingModeEnabled = true;
+    notifyListeners();
+  }
+
+  void resetMatchingMode() {
+    store.matchingModeEnabled = false;
+    notifyListeners();
+  }
+
+  // 🔤 Schriftart & Größe (siehe theme.dart kFontOptions/resolveFontFamily).
+  String get fontFamily => store.fontFamily;
+  void setFontFamily(String key) {
+    store.fontFamily = key;
+    notifyListeners();
+  }
+
+  double get fontSizeScale => store.fontSizeScale;
+  void setFontSizeScale(double v) {
+    store.fontSizeScale = v;
     notifyListeners();
   }
 
