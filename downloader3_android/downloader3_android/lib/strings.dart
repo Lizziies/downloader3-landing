@@ -182,6 +182,17 @@ class AppStrings {
   'music_resolving': 'Löse Musik-Link auf...',
   'music_lookup_failed': 'Musik-Link konnte nicht aufgelöst werden.',
   'music_platform_label': 'Spotify / Apple Music / Amazon',
+'download_clip_only': 'Nur Ausschnitt',
+'download_clip_start': 'Start',
+'download_clip_end': 'Ende',
+'download_clip_invalid_format': 'Ungültiges Zeitformat (z.B. 00:30 oder 01:15:00)',
+'download_start_later': 'Später starten',
+'download_scheduled_for': 'Geplant für',
+'download_cancel_scheduled': 'Geplanten Download abbrechen',
+'download_scheduled_note': 'Hinweis: Die App muss dafür geöffnet bleiben.',
+'download_wallpaper_mode': 'Wallpaper-Modus',
+'wallpaper_detected_resolution': 'Erkannte Auflösung',
+'wallpaper_hint': 'Lädt das beste verfügbare Vorschaubild herunter (keine automatische Zuschneidung auf die exakte Auflösung).',
   };
 
   final Map<String, String> _en = {
@@ -362,6 +373,17 @@ class AppStrings {
   'music_resolving': 'Resolving music link...',
   'music_lookup_failed': 'Could not resolve music link.',
   'music_platform_label': 'Spotify / Apple Music / Amazon',
+'download_clip_only': 'Clip only',
+'download_clip_start': 'Start',
+'download_clip_end': 'End',
+'download_clip_invalid_format': 'Invalid time format (e.g. 00:30 or 01:15:00)',
+'download_start_later': 'Start later',
+'download_scheduled_for': 'Scheduled for',
+'download_cancel_scheduled': 'Cancel scheduled download',
+'download_scheduled_note': 'Note: The app needs to stay open for this.',
+'download_wallpaper_mode': 'Wallpaper mode',
+'wallpaper_detected_resolution': 'Detected resolution',
+'wallpaper_hint': 'Downloads the best available thumbnail image (no automatic crop to the exact resolution).',
   };
 
   String lang;
