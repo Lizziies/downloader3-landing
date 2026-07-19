@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import '../app_state.dart';
 import '../native_downloader.dart';
 import '../theme.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 /// ⬇️ Pendant zu page_download() in main.py -- echter Download-Motor
 /// über DownloaderPlugin.kt / native_downloader.dart (yt-dlp+ffmpeg,
@@ -88,6 +89,7 @@ String resolution = '720p'; // Anzeige-Wert aus _kResList, oder 'auto'
 String format = 'mp4';
 bool playlistMode = false;
 bool batchMode = false;
+bool downloadSubtitles = false;
 
 bool initializing = true;
 bool initFailed = false;
@@ -302,6 +304,41 @@ if (v) batchMode = false; // 🔀 gegenseitig ausschließend, wie am Desktop
 });
 }
 
+// 📶 WiFi-Priorität/Mobilfunk-Vorab-Check (Pendant zu den neuen Einstellungen
+// im Settings-Tab): blockiert den Downloadstart, wenn gerade nur mobile
+// Daten verfügbar sind UND der Nutzer das in den Einstellungen deaktiviert
+// hat. "wifiPriority" selbst wird bewusst NICHT hier ausgewertet -- ohne
+// eigenes Netzwerk-Binding (siehe Kommentar in AuthStore) gibt es hier
+// nichts Sinnvolles zu erzwingen, das Betriebssystem entscheidet ohnehin
+// selbst, welche Schnittstelle genutzt wird.
+Future<bool> _checkMobileDataAllowed() async {
+final results = await Connectivity().checkConnectivity();
+final isMobile = results.contains(ConnectivityResult.mobile);
+if (isMobile && !st.store.mobileDataAllowed) {
+if (!mounted) return false;
+await showDialog(
+context: context,
+builder: (ctx) => AlertDialog(
+backgroundColor: kCardDark,
+title: Text('📶 ${isDe ? "Mobile Daten" : "Mobile data"}',
+style: TextStyle(color: st.accent.main)),
+content: Text(
+st.t('download_blocked_mobile_data'),
+style: const TextStyle(color: Colors.white),
+),
+actions: [
+TextButton(
+onPressed: () => Navigator.of(ctx).pop(),
+child: const Text('OK'),
+),
+],
+),
+);
+return false;
+}
+return true;
+}
+
 Future<void> _onBatchToggled(bool v) async {
 if (v && !st.isPremium) {
 await _showPremiumLockedDialog();
@@ -320,6 +357,7 @@ return;
 }
 final url = playlistMode ? playlistUrlCtl.text.trim() : urlCtl.text.trim();
 if (url.isEmpty) return;
+if (!await _checkMobileDataAllowed()) return;
 _currentUrl = url;
 setState(() {
 downloading = true;
@@ -337,6 +375,7 @@ isAudio: isAudio,
 format: format,
 height: height,
 playlist: playlistMode,
+downloadSubtitles: downloadSubtitles,
 );
 _activeProcessId = processId;
 } catch (e) {
@@ -358,6 +397,7 @@ final urls = batchCtl.text
 .where((l) => l.isNotEmpty)
 .toList();
 if (urls.isEmpty) return;
+if (!await _checkMobileDataAllowed()) return;
 setState(() {
 _queue = List.of(urls);
 _queueTotal = urls.length;
@@ -389,6 +429,7 @@ height: (_kResFree.contains(resolution) || st.isPremium)
 // 📋 Warteschlangen-Einträge sind am Desktop IMMER
 // Einzel-Downloads, nie Playlists (siehe _download_one_sync).
 playlist: false,
+downloadSubtitles: downloadSubtitles,
 );
 _activeProcessId = processId;
 await _waitForCompletion(processId);
@@ -837,6 +878,17 @@ title: Text(
 isDe
 ? '📺 Ganze Playlist/Kanal laden (Premium)'
 : '📺 Download whole playlist/channel (Premium)',
+style: const TextStyle(color: Colors.white, fontSize: 13),
+),
+controlAffinity: ListTileControlAffinity.leading,
+),
+CheckboxListTile(
+contentPadding: EdgeInsets.zero,
+dense: true,
+value: downloadSubtitles,
+onChanged: (v) => setState(() => downloadSubtitles = v ?? false),
+title: Text(
+st.t('download_subtitles_label'),
 style: const TextStyle(color: Colors.white, fontSize: 13),
 ),
 controlAffinity: ListTileControlAffinity.leading,
