@@ -55,6 +55,7 @@ bool isAudio = false,
 String format = 'mp4',
 int? height,
 bool playlist = false,
+bool downloadSubtitles = false,
 }) async {
 try {
 return await _methodChannel.invokeMethod<String>('startDownload', {
@@ -63,6 +64,7 @@ return await _methodChannel.invokeMethod<String>('startDownload', {
 'format': format,
 if (height != null) 'height': height,
 'playlist': playlist,
+'downloadSubtitles': downloadSubtitles,
 });
 } on PlatformException catch (e) {
 throw DownloaderException(e.message ?? 'download failed');
