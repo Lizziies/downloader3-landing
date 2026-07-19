@@ -5,6 +5,7 @@ import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import '../app_state.dart';
 import '../native_downloader.dart';
+import '../notification_helper.dart';
 import '../theme.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
@@ -177,6 +178,12 @@ downloading = false;
 progress = 1.0;
 finishedDir = e['outputDir'] as String?;
 });
+if (st.store.notificationsEnabled) {
+final title = file != null
+? _historyName(file)
+: st.t('notification_download_complete_title');
+NotificationHelper.showDownloadCompleteNotification(title);
+}
 }
 break;
 case 'error':
