@@ -56,6 +56,9 @@ String format = 'mp4',
 int? height,
 bool playlist = false,
 bool downloadSubtitles = false,
+String? clipStart,
+String? clipEnd,
+bool wallpaperMode = false,
 }) async {
 try {
 return await _methodChannel.invokeMethod<String>('startDownload', {
@@ -65,6 +68,11 @@ return await _methodChannel.invokeMethod<String>('startDownload', {
 if (height != null) 'height': height,
 'playlist': playlist,
 'downloadSubtitles': downloadSubtitles,
+'wallpaperMode': wallpaperMode,
+if (clipStart != null && clipStart.isNotEmpty && clipEnd != null && clipEnd.isNotEmpty)
+'clipStart': clipStart,
+if (clipStart != null && clipStart.isNotEmpty && clipEnd != null && clipEnd.isNotEmpty)
+'clipEnd': clipEnd,
 });
 } on PlatformException catch (e) {
 throw DownloaderException(e.message ?? 'download failed');
