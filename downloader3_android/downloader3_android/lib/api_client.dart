@@ -118,6 +118,16 @@ class ApiClient {
     return _decode(r);
   }
 
+  // --- Music-Link-Aufloesung (Spotify/Apple Music/Amazon Music) --------
+  Future<Map<String, dynamic>> musicLookup(String url) async {
+    final r = await http.post(
+      _u('/api/music-lookup'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'url': url}),
+    ).timeout(const Duration(seconds: 30));
+    return _decode(r);
+  }
+
   // --- 🤝 Helfer-Ehrentafel ------------------------------------------------
   Future<Map<String, dynamic>> helpersPublic() async {
     final r = await http.get(_u('/api/helpers-public'))
