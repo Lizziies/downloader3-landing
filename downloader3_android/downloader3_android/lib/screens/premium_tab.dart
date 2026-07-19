@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../app_state.dart';
 import '../theme.dart';
 
@@ -17,6 +18,15 @@ class _PremiumTabState extends State<PremiumTab> {
   bool busy = false;
 
   AppState get st => widget.state;
+
+  /// 💳 Öffnet die Bezahlseite im Browser (PayPal-Checkout auf der
+  /// Landing-Page) -- die App selbst wickelt keine Zahlung ab, genau
+  /// wie am Desktop. Nach der Zahlung bekommt der Nutzer per Mail einen
+  /// Code, den er hier im "Code einlösen"-Feld einträgt.
+  Future<void> _buyPremium() async {
+    final uri = Uri.parse('https://lizziies.github.io/downloader3-checkout/');
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
 
   Future<void> _redeem() async {
     final email = st.currentEmail;
@@ -93,6 +103,18 @@ class _PremiumTabState extends State<PremiumTab> {
               ],
             ),
           ),
+          if (!isPremium) ...[
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _buyPremium,
+              child: Text('⭐ ${st.t('buy_premium')}'),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              st.t('buy_premium_desc'),
+              style: const TextStyle(color: kMuted, fontSize: 11),
+            ),
+          ],
           const SizedBox(height: 20),
           Text(st.t('redeem_code'),
               style: const TextStyle(
