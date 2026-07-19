@@ -179,6 +179,9 @@ class AppStrings {
     'settings_font_family': 'Schriftart',
     'settings_font_size': 'Schriftgröße',
     'settings_font_comic_preset': 'Comic Neue @ 110%',
+  'music_resolving': 'Löse Musik-Link auf...',
+  'music_lookup_failed': 'Musik-Link konnte nicht aufgelöst werden.',
+  'music_platform_label': 'Spotify / Apple Music / Amazon',
   };
 
   final Map<String, String> _en = {
@@ -356,6 +359,9 @@ class AppStrings {
     'settings_font_family': 'Font family',
     'settings_font_size': 'Font size',
     'settings_font_comic_preset': 'Comic Neue @ 110%',
+  'music_resolving': 'Resolving music link...',
+  'music_lookup_failed': 'Could not resolve music link.',
+  'music_platform_label': 'Spotify / Apple Music / Amazon',
   };
 
   String lang;
