@@ -67,7 +67,7 @@ class _ConvertTabState extends State<ConvertTab> {
                   color: Colors.white, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
-            initialValue: targetFormat,
+                  value: targetFormat,
             items: _formats
                 .map((f) =>
                     DropdownMenuItem(value: f, child: Text(f.toUpperCase())))
