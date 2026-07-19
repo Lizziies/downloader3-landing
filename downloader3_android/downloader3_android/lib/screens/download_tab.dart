@@ -92,6 +92,13 @@ String format = 'mp4';
 bool playlistMode = false;
 bool batchMode = false;
 bool downloadSubtitles = false;
+bool clipOnly = false;
+final clipStartCtl = TextEditingController();
+final clipEndCtl = TextEditingController();
+String? clipError;
+bool wallpaperMode = false;
+Timer? _scheduledTimer;
+DateTime? _scheduledAt;
 
 bool initializing = true;
 bool initFailed = false;
@@ -130,9 +137,12 @@ _sub = NativeDownloader.progressStream.listen(_onEvent);
 @override
 void dispose() {
 _sub?.cancel();
+_scheduledTimer?.cancel();
 playlistUrlCtl.dispose();
 batchCtl.dispose();
 historySearchCtl.dispose();
+clipStartCtl.dispose();
+clipEndCtl.dispose();
 super.dispose();
 }
 
@@ -365,6 +375,17 @@ return;
 }
 final url = playlistMode ? playlistUrlCtl.text.trim() : urlCtl.text.trim();
 if (url.isEmpty) return;
+if (!playlistMode && clipOnly) {
+final cs = clipStartCtl.text.trim();
+final ce = clipEndCtl.text.trim();
+final re = RegExp(r'^\d{1,2}(:\d{2}){1,2}$');
+if (cs.isEmpty || ce.isEmpty || !re.hasMatch(cs) || !re.hasMatch(ce)) {
+setState(() => clipError = st.t('download_clip_invalid_format'));
+return;
+} else {
+setState(() => clipError = null);
+}
+}
 if (!playlistMode && isMusicLink(url)) {
 await _handleMusicLink(url);
 return;
@@ -388,6 +409,9 @@ format: format,
 height: height,
 playlist: playlistMode,
 downloadSubtitles: downloadSubtitles,
+clipStart: (!playlistMode && clipOnly) ? clipStartCtl.text.trim() : null,
+clipEnd: (!playlistMode && clipOnly) ? clipEndCtl.text.trim() : null,
+wallpaperMode: wallpaperMode,
 );
 _activeProcessId = processId;
 } catch (e) {
@@ -648,6 +672,32 @@ await completer.future.timeout(const Duration(minutes: 30));
 } finally {
 await sub.cancel();
 }
+}
+
+// ⏰ „Später starten“ (Task L): rein App-interner Timer -- die App
+// muss dabei geöffnet bleiben, es gibt keinen OS-Scheduler-Zugriff.
+Future<void> _pickScheduleTime() async {
+final now = TimeOfDay.now();
+final picked = await showTimePicker(context: context, initialTime: now);
+if (picked == null) return;
+final nowDt = DateTime.now();
+var target = DateTime(nowDt.year, nowDt.month, nowDt.day, picked.hour, picked.minute);
+if (target.isBefore(nowDt)) {
+target = target.add(const Duration(days: 1));
+}
+_scheduledTimer?.cancel();
+setState(() => _scheduledAt = target);
+_scheduledTimer = Timer(target.difference(nowDt), () {
+if (!mounted) return;
+setState(() => _scheduledAt = null);
+_startDownload();
+});
+}
+
+void _cancelScheduled() {
+_scheduledTimer?.cancel();
+_scheduledTimer = null;
+setState(() => _scheduledAt = null);
 }
 
 void _showFavoritesFromField() => _showFavoritesDialog();
@@ -1073,6 +1123,75 @@ style: const TextStyle(color: Colors.white, fontSize: 13),
 ),
 controlAffinity: ListTileControlAffinity.leading,
 ),
+CheckboxListTile(
+contentPadding: EdgeInsets.zero,
+dense: true,
+value: clipOnly,
+onChanged: (v) => setState(() {
+clipOnly = v ?? false;
+clipError = null;
+}),
+title: Text(
+st.t('download_clip_only'),
+style: const TextStyle(color: Colors.white, fontSize: 13),
+),
+controlAffinity: ListTileControlAffinity.leading,
+),
+if (clipOnly) ...[
+Row(
+children: [
+Expanded(
+child: TextField(
+controller: clipStartCtl,
+decoration: InputDecoration(
+labelText: st.t('download_clip_start'),
+hintText: '00:30',
+),
+),
+),
+const SizedBox(width: 8),
+Expanded(
+child: TextField(
+controller: clipEndCtl,
+decoration: InputDecoration(
+labelText: st.t('download_clip_end'),
+hintText: '01:15:00',
+),
+),
+),
+],
+),
+if (clipError != null) ...[
+const SizedBox(height: 4),
+Text(clipError!,
+style: const TextStyle(color: Color(0xFFF87171), fontSize: 11)),
+],
+],
+CheckboxListTile(
+contentPadding: EdgeInsets.zero,
+dense: true,
+value: wallpaperMode,
+onChanged: (v) => setState(() => wallpaperMode = v ?? false),
+title: Text(
+st.t('download_wallpaper_mode'),
+style: const TextStyle(color: Colors.white, fontSize: 13),
+),
+controlAffinity: ListTileControlAffinity.leading,
+),
+if (wallpaperMode) ...[
+Builder(builder: (ctx) {
+final mq = MediaQuery.of(ctx);
+final w = (mq.size.width * mq.devicePixelRatio).round();
+final h = (mq.size.height * mq.devicePixelRatio).round();
+return Padding(
+padding: const EdgeInsets.only(top: 4),
+child: Text(
+'${st.t('wallpaper_detected_resolution')}: ${w}x$h\n${st.t('wallpaper_hint')}',
+style: const TextStyle(color: kMuted, fontSize: 11),
+),
+);
+}),
+],
 ],
 ),
 ),
@@ -1089,6 +1208,40 @@ child: Text(downloading
 ),
 ],
 ),
+const SizedBox(height: 10),
+Row(
+children: [
+Expanded(
+child: OutlinedButton.icon(
+onPressed: downloading
+? null
+    : (_scheduledAt == null ? _pickScheduleTime : null),
+icon: const Icon(Icons.schedule),
+label: Text(st.t('download_start_later')),
+),
+),
+if (_scheduledAt != null) ...[
+const SizedBox(width: 8),
+IconButton(
+tooltip: st.t('download_cancel_scheduled'),
+icon: const Icon(Icons.close, color: Color(0xFFF87171)),
+onPressed: _cancelScheduled,
+),
+],
+],
+),
+if (_scheduledAt != null) ...[
+const SizedBox(height: 6),
+Text(
+'${st.t('download_scheduled_for')} '
+'${_scheduledAt!.hour.toString().padLeft(2, '0')}:'
+'${_scheduledAt!.minute.toString().padLeft(2, '0')}',
+style: TextStyle(color: st.accent.main, fontSize: 12, fontWeight: FontWeight.w600),
+),
+const SizedBox(height: 2),
+Text(st.t('download_scheduled_note'),
+style: const TextStyle(color: kMuted, fontSize: 11)),
+],
 if (downloading) ...[
 const SizedBox(height: 10),
 LinearProgressIndicator(value: progress),
