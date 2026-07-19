@@ -5,6 +5,10 @@ import '../app_state.dart';
 import '../theme.dart';
 import '../update_checker.dart';
 import 'auth_screen.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import '../notification_helper.dart';
 
 class SettingsTab extends StatefulWidget {
 final AppState state;
@@ -20,6 +24,8 @@ String? updateMsg;
 String? contactMsg;
 bool busyUpdate = false;
 bool busyContact = false;
+bool busyBackup = false;
+String? backupMsg;
 
 AppState get st => widget.state;
 
@@ -61,6 +67,61 @@ contactCtl.clear();
 contactMsg = '✗ ${r['error'] ?? ''}';
 }
 });
+}
+
+Future<File> _backupFile() async {
+final dir = await getApplicationDocumentsDirectory();
+return File('${dir.path}/downloader3_backup.json');
+}
+
+Future<void> _createBackup() async {
+setState(() {
+busyBackup = true;
+backupMsg = null;
+});
+try {
+final data = st.store.exportBackup();
+final file = await _backupFile();
+await file.writeAsString(jsonEncode(data));
+setState(() {
+busyBackup = false;
+backupMsg = st.t('backup_created_success');
+});
+} catch (e) {
+setState(() {
+busyBackup = false;
+backupMsg = '✗ ${st.t('backup_restore_failed')}';
+});
+}
+}
+
+Future<void> _restoreBackup() async {
+setState(() {
+busyBackup = true;
+backupMsg = null;
+});
+try {
+final file = await _backupFile();
+if (!await file.exists()) {
+setState(() {
+busyBackup = false;
+backupMsg = '✗ ${st.t('backup_restore_failed')}';
+});
+return;
+}
+final raw = await file.readAsString();
+final data = jsonDecode(raw) as Map<String, dynamic>;
+await st.store.importBackup(data);
+setState(() {
+busyBackup = false;
+backupMsg = st.t('backup_restored_success');
+});
+} catch (e) {
+setState(() {
+busyBackup = false;
+backupMsg = '✗ ${st.t('backup_restore_failed')}';
+});
+}
 }
 
 @override
@@ -123,6 +184,13 @@ value: st.store.mobileDataAllowed,
 activeColor: st.accent.main,
 onChanged: (v) => setState(() => st.store.mobileDataAllowed = v),
 ),
+SwitchListTile(
+title: Text(st.t('settings_notifications_enabled'),
+style: const TextStyle(color: Colors.white)),
+value: st.store.notificationsEnabled,
+activeColor: st.accent.main,
+onChanged: (v) => setState(() => st.store.notificationsEnabled = v),
+),
 const Divider(color: kCardDark2),
 ListTile(
 leading: const Icon(Icons.system_update, color: kMuted),
@@ -172,6 +240,47 @@ child: Text(st.t('settings_contact_send')),
 ),
 ],
 ),
+),
+const Divider(color: kCardDark2),
+Padding(
+padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+child: Column(
+crossAxisAlignment: CrossAxisAlignment.start,
+children: [
+Text(st.t('settings_backup_section_title'),
+style: const TextStyle(
+color: Colors.white, fontWeight: FontWeight.bold)),
+const SizedBox(height: 8),
+Row(
+children: [
+Expanded(
+child: OutlinedButton(
+onPressed: busyBackup ? null : _createBackup,
+child: Text(st.t('settings_backup_create')),
+),
+),
+const SizedBox(width: 8),
+Expanded(
+child: OutlinedButton(
+onPressed: busyBackup ? null : _restoreBackup,
+child: Text(st.t('settings_backup_restore')),
+),
+),
+],
+),
+if (backupMsg != null) ...[
+const SizedBox(height: 6),
+Text(backupMsg!, style: const TextStyle(color: kMuted)),
+],
+],
+),
+),
+SwitchListTile(
+title: Text(st.t('settings_auto_backup'),
+style: const TextStyle(color: Colors.white)),
+value: st.store.autoBackupEnabled,
+activeColor: st.accent.main,
+onChanged: (v) => setState(() => st.store.autoBackupEnabled = v),
 ),
 const Divider(color: kCardDark2),
 ListTile(
