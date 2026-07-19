@@ -9,9 +9,9 @@ import 'download_tab.dart';
 import 'premium_tab.dart';
 import 'send_file_tab.dart';
 import 'helper_tab.dart';
-import 'ai_studio_tab.dart';
 import 'settings_tab.dart';
 import 'admin_tab.dart';
+import 'auth_screen.dart';
 
 class HomeShell extends StatefulWidget {
   final AppState state;
@@ -46,14 +46,12 @@ class _HomeShellState extends State<HomeShell> {
   List<_NavItem> get _items => [
         _NavItem(st.t('nav_download'), Icons.download_rounded,
             (s) => DownloadTab(state: s)),
-        _NavItem(st.t('nav_premium'), Icons.star_rounded,
-            (s) => PremiumTab(state: s)),
         _NavItem(st.t('nav_sendfile'), Icons.send_rounded,
             (s) => SendFileTab(state: s)),
+        _NavItem(st.t('nav_premium'), Icons.star_rounded,
+            (s) => PremiumTab(state: s)),
         _NavItem(st.t('nav_helper'), Icons.favorite_rounded,
             (s) => HelperTab(state: s)),
-        _NavItem(st.t('nav_ai'), Icons.auto_awesome_rounded,
-            (s) => AiStudioTab(state: s)),
         _NavItem(st.t('nav_settings'), Icons.settings_rounded,
             (s) => SettingsTab(state: s)),
         if (isOwnerEmail)
@@ -114,6 +112,20 @@ class _HomeShellState extends State<HomeShell> {
                     Navigator.of(context).pop();
                   },
                 ),
+              ListTile(
+                leading: const Icon(Icons.logout, color: Color(0xFFF87171)),
+                title: Text(st.t('logout'),
+                    style: const TextStyle(color: Color(0xFFF87171))),
+                onTap: () async {
+                  await st.logout();
+                  if (context.mounted) {
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (_) => AuthScreen(state: st)),
+                      (route) => false,
+                    );
+                  }
+                },
+              ),
             ],
           ),
         ),
