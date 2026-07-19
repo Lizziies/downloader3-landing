@@ -161,6 +161,15 @@ class AppStrings {
     'settings_wifi_priority': 'WLAN priorisieren',
     'settings_mobile_data_allowed': 'Download über mobile Daten erlauben',
     'download_blocked_mobile_data': 'Download über mobile Daten ist deaktiviert. Bitte in den Einstellungen aktivieren oder WLAN verwenden.',
+'settings_notifications_enabled': 'Benachrichtigungen bei Download-Ende',
+'notification_download_complete_title': 'Download abgeschlossen',
+'settings_backup_section_title': 'Backup',
+'settings_backup_create': 'Backup erstellen',
+'settings_backup_restore': 'Backup wiederherstellen',
+'settings_auto_backup': 'Automatisches Backup',
+'backup_created_success': 'Backup erfolgreich erstellt! 🎉',
+'backup_restored_success': 'Backup erfolgreich wiederhergestellt! 🎉',
+'backup_restore_failed': 'Backup konnte nicht wiederhergestellt werden.',
   };
 
   final Map<String, String> _en = {
@@ -320,6 +329,15 @@ class AppStrings {
     'settings_wifi_priority': 'Prioritize WiFi',
     'settings_mobile_data_allowed': 'Allow downloads over mobile data',
     'download_blocked_mobile_data': 'Downloads over mobile data are disabled. Enable it in Settings or use WiFi.',
+'settings_notifications_enabled': 'Notify when download finishes',
+'notification_download_complete_title': 'Download complete',
+'settings_backup_section_title': 'Backup',
+'settings_backup_create': 'Create backup',
+'settings_backup_restore': 'Restore backup',
+'settings_auto_backup': 'Automatic backup',
+'backup_created_success': 'Backup created successfully! 🎉',
+'backup_restored_success': 'Backup restored successfully! 🎉',
+'backup_restore_failed': 'Failed to restore backup.',
   };
 
   String lang;
