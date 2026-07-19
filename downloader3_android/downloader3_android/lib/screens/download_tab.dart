@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import '../app_state.dart';
 import '../native_downloader.dart';
 import '../notification_helper.dart';
+import '../music_link_detector.dart';
 import '../theme.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
@@ -364,6 +365,10 @@ return;
 }
 final url = playlistMode ? playlistUrlCtl.text.trim() : urlCtl.text.trim();
 if (url.isEmpty) return;
+if (!playlistMode && isMusicLink(url)) {
+await _handleMusicLink(url);
+return;
+}
 if (!await _checkMobileDataAllowed()) return;
 _currentUrl = url;
 setState(() {
@@ -405,6 +410,169 @@ final urls = batchCtl.text
 .toList();
 if (urls.isEmpty) return;
 if (!await _checkMobileDataAllowed()) return;
+final resolvedUrls = await _expandMusicLinks(urls);
+if (resolvedUrls.isEmpty) return;
+await _runQueue(resolvedUrls);
+}
+
+// Expands Spotify/Apple Music/Amazon Music links in [urls] into
+// ytsearch1:<query> entries resolved via the backend's music-lookup
+// endpoint. Playlist/album links with multiple tracks show a
+// confirmation dialog first; declining skips that entry. Non-music
+// links are passed through unchanged.
+Future<List<String>> _expandMusicLinks(List<String> urls) async {
+final result = <String>[];
+for (final u in urls) {
+if (!isMusicLink(u)) {
+result.add(u);
+continue;
+}
+try {
+final res = await st.api.musicLookup(u);
+final items =
+(res['ok'] == true && res['items'] is List) ? res['items'] as List : const [];
+if (items.isEmpty) continue;
+final tracks = items.whereType<Map>().toList();
+if (tracks.length == 1) {
+final q = buildYtSearchQuery(
+tracks.first['title'] as String?, tracks.first['artist'] as String?);
+if (q.isNotEmpty) result.add('ytsearch1:$q');
+} else {
+final queries = tracks
+.map((t) => buildYtSearchQuery(t['title'] as String?, t['artist'] as String?))
+.where((q) => q.isNotEmpty)
+.toList();
+if (await _confirmMusicPlaylist(queries)) {
+result.addAll(queries.map((q) => 'ytsearch1:$q'));
+}
+}
+} catch (_) {
+// A failed music link must not stop the rest of the queue,
+// same philosophy as the per-item error handling below.
+}
+}
+return result;
+}
+
+// Confirmation dialog listing resolved playlist/album tracks before
+// they get queued as individual YouTube search downloads.
+Future<bool> _confirmMusicPlaylist(List<String> queries) async {
+final display = queries.length > 12 ? queries.take(12).toList() : queries;
+final more = queries.length - display.length;
+final result = await showDialog<bool>(
+context: context,
+builder: (ctx) => AlertDialog(
+backgroundColor: kCardDark,
+title: Text(
+isDe ? '🎵 ${queries.length} Titel gefunden' : '🎵 ${queries.length} tracks found',
+style: TextStyle(color: st.accent.main)),
+content: SizedBox(
+width: 320,
+child: SingleChildScrollView(
+child: Column(
+crossAxisAlignment: CrossAxisAlignment.start,
+children: [
+...display.map((q) =>
+Text('• $q', style: const TextStyle(color: Colors.white, fontSize: 13))),
+if (more > 0)
+Text(isDe ? 'und $more weitere...' : 'and $more more...',
+style: const TextStyle(color: kMuted, fontSize: 12)),
+],
+),
+),
+),
+actions: [
+TextButton(
+onPressed: () => Navigator.of(ctx).pop(false),
+child: Text(isDe ? 'Abbrechen' : 'Cancel'),
+),
+TextButton(
+onPressed: () => Navigator.of(ctx).pop(true),
+child: Text(isDe ? 'Herunterladen' : 'Download'),
+),
+],
+),
+);
+return result ?? false;
+}
+
+// Resolves a single music link (Spotify/Apple Music/Amazon Music)
+// pasted into the single-URL field: single track goes straight into
+// the normal download pipeline, playlist/album goes into the queue.
+Future<void> _handleMusicLink(String url) async {
+if (!await _checkMobileDataAllowed()) return;
+_currentUrl = url;
+setState(() {
+downloading = true;
+progress = null;
+statusLine = st.t('music_resolving');
+error = null;
+finishedDir = null;
+});
+try {
+final res = await st.api.musicLookup(url);
+final items =
+(res['ok'] == true && res['items'] is List) ? res['items'] as List : const [];
+final tracks = items.whereType<Map>().toList();
+if (tracks.isEmpty) {
+setState(() {
+downloading = false;
+statusLine = null;
+error = st.t('music_lookup_failed');
+});
+return;
+}
+if (tracks.length > 1) {
+final queries = tracks
+.map((t) => buildYtSearchQuery(t['title'] as String?, t['artist'] as String?))
+.where((q) => q.isNotEmpty)
+.toList();
+setState(() {
+downloading = false;
+statusLine = null;
+});
+if (!await _confirmMusicPlaylist(queries)) return;
+await _runQueue(queries.map((q) => 'ytsearch1:$q').toList());
+return;
+}
+final q = buildYtSearchQuery(
+tracks.first['title'] as String?, tracks.first['artist'] as String?);
+if (q.isEmpty) {
+setState(() {
+downloading = false;
+statusLine = null;
+error = st.t('music_lookup_failed');
+});
+return;
+}
+final musicFormat = format == 'mp4' ? 'mp3' : format;
+final isAudio = _kAudioExts.contains(musicFormat);
+final height = resolution == 'auto' ? null : _kResHeight[resolution];
+final processId = await NativeDownloader.startDownload(
+url: 'ytsearch1:$q',
+isAudio: isAudio,
+format: musicFormat,
+height: height,
+playlist: false,
+downloadSubtitles: downloadSubtitles,
+);
+_activeProcessId = processId;
+setState(() => statusLine = null);
+} catch (e) {
+setState(() {
+downloading = false;
+statusLine = null;
+error = st.t('music_lookup_failed');
+});
+}
+}
+
+// 📋 Warteschlangen-Modus -- Pendant zu start_download()'s
+// Batch-Zweig + _process_queue()/_queue_worker() am Desktop, hier
+// bewusst sequenziell statt mit mehreren Worker-Threads (siehe
+// Kommentar oben bei den Feldern). Extracted out of _startQueue so
+// resolved music search queries can be queued the same way.
+Future<void> _runQueue(List<String> urls) async {
 setState(() {
 _queue = List.of(urls);
 _queueTotal = urls.length;
@@ -735,6 +903,11 @@ icon: Icon(Icons.star_rounded, color: st.accent.main),
 onPressed: _showFavoritesFromField,
 ),
 ],
+),
+const SizedBox(height: 4),
+Text(
+st.t('music_platform_label'),
+style: const TextStyle(color: kMuted, fontSize: 11),
 ),
 ] else ...[
 Text(
