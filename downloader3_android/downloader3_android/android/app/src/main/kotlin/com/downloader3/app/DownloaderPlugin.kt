@@ -165,6 +165,10 @@ class DownloaderPlugin(private val context: Context) : FlutterPlugin,
         val format = if (formatArg.isNotBlank()) formatArg else (if (isAudio) "mp3" else "mp4")
         val height = call.argument<Int>("height")
         val playlist = call.argument<Boolean>("playlist") ?: false
+        // 📝 Untertitel automatisch mitladen (SRT/VTT, inkl. automatisch
+        // generierter Untertitel) -- Pendant zur "Untertitel"-Option, die es
+        // am Desktop noch nicht gibt.
+        val downloadSubtitles = call.argument<Boolean>("downloadSubtitles") ?: false
         val processId = UUID.randomUUID().toString()
 
         val outDir = File(context.getExternalFilesDir(null), "Downloads")
@@ -197,6 +201,17 @@ class DownloaderPlugin(private val context: Context) : FlutterPlugin,
         request.addOption("--socket-timeout", "30")
         request.addOption("--retries", "5")
         request.addOption("--fragment-retries", "5")
+
+        // 📝 Untertitel automatisch herunterladen: --write-subs holt von
+        // der Plattform bereitgestellte (manuelle) Untertitel, --write-auto-subs
+        // zusätzlich automatisch generierte, --sub-langs all alle verfügbaren
+        // Sprachen, --convert-subs srt vereinheitlicht das Zielformat auf SRT.
+        if (downloadSubtitles) {
+            request.addOption("--write-subs")
+            request.addOption("--write-auto-subs")
+            request.addOption("--sub-langs", "all")
+            request.addOption("--convert-subs", "srt")
+        }
 
         if (isAudio) {
             request.addOption("-f", "bestaudio/best")
