@@ -169,6 +169,13 @@ class DownloaderPlugin(private val context: Context) : FlutterPlugin,
         // generierter Untertitel) -- Pendant zur "Untertitel"-Option, die es
         // am Desktop noch nicht gibt.
         val downloadSubtitles = call.argument<Boolean>("downloadSubtitles") ?: false
+        // ✂️ Clip-Trim (Pendant zu Task K): nur gesetzt, wenn BEIDE Werte
+        // vorhanden sind -- yt-dlp's --download-sections mit "*start-end".
+        val clipStart = call.argument<String>("clipStart")
+        val clipEnd = call.argument<String>("clipEnd")
+        // 🖼️ Wallpaper-Modus (Pendant zu Task M): lädt zusätzlich das beste
+        // verfügbare Thumbnail-Bild als JPG herunter.
+        val wallpaperMode = call.argument<Boolean>("wallpaperMode") ?: false
         val processId = UUID.randomUUID().toString()
 
         val outDir = File(context.getExternalFilesDir(null), "Downloads")
@@ -211,6 +218,21 @@ class DownloaderPlugin(private val context: Context) : FlutterPlugin,
             request.addOption("--write-auto-subs")
             request.addOption("--sub-langs", "all")
             request.addOption("--convert-subs", "srt")
+        }
+
+        // ✂️ Nur einen Zeitausschnitt herunterladen -- yt-dlp's eigene,
+        // gut dokumentierte CLI-Option, intern per ffmpeg-Postprocessing
+        // umgesetzt (kein direkter FFmpeg-Klassenzugriff nötig).
+        if (!clipStart.isNullOrBlank() && !clipEnd.isNullOrBlank()) {
+            request.addOption("--download-sections", "*${clipStart}-${clipEnd}")
+        }
+
+        // 🖼️ Wallpaper-Modus: bestes verfügbares Thumbnail als JPG mitladen
+        // (--write-thumbnail / --convert-thumbnails sind stabile, offiziell
+        // dokumentierte yt-dlp-CLI-Optionen).
+        if (wallpaperMode) {
+            request.addOption("--write-thumbnail")
+            request.addOption("--convert-thumbnails", "jpg")
         }
 
         if (isAudio) {
