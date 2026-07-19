@@ -170,6 +170,15 @@ class AppStrings {
 'backup_created_success': 'Backup erfolgreich erstellt! 🎉',
 'backup_restored_success': 'Backup erfolgreich wiederhergestellt! 🎉',
 'backup_restore_failed': 'Backup konnte nicht wiederhergestellt werden.',
+    'matching_mode_title': 'Matching Mode',
+    'matching_mode_hint':
+        'Wähle eine Basisfarbe, die App passt Hintergrund, Karten und Buttons automatisch dazu an.',
+    'matching_apply': 'Anwenden',
+    'matching_reset': 'Matching Mode zurücksetzen',
+    'settings_font_section_title': 'Schriftart & Größe',
+    'settings_font_family': 'Schriftart',
+    'settings_font_size': 'Schriftgröße',
+    'settings_font_comic_preset': 'Comic Neue @ 110%',
   };
 
   final Map<String, String> _en = {
@@ -338,6 +347,15 @@ class AppStrings {
 'backup_created_success': 'Backup created successfully! 🎉',
 'backup_restored_success': 'Backup restored successfully! 🎉',
 'backup_restore_failed': 'Failed to restore backup.',
+    'matching_mode_title': 'Matching Mode',
+    'matching_mode_hint':
+        'Pick a base color, the app automatically matches background, cards and buttons to it.',
+    'matching_apply': 'Apply',
+    'matching_reset': 'Reset Matching Mode',
+    'settings_font_section_title': 'Font & Size',
+    'settings_font_family': 'Font family',
+    'settings_font_size': 'Font size',
+    'settings_font_comic_preset': 'Comic Neue @ 110%',
   };
 
   String lang;
