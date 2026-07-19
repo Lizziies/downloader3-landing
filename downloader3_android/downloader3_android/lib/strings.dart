@@ -157,6 +157,10 @@ class AppStrings {
     'history_no_match': 'Keine Treffer.',
     'history_empty': 'Noch keine abgeschlossenen Downloads.',
     'open_folder': 'Ordner öffnen',
+    'download_subtitles_label': 'Untertitel automatisch herunterladen (SRT/VTT)',
+    'settings_wifi_priority': 'WLAN priorisieren',
+    'settings_mobile_data_allowed': 'Download über mobile Daten erlauben',
+    'download_blocked_mobile_data': 'Download über mobile Daten ist deaktiviert. Bitte in den Einstellungen aktivieren oder WLAN verwenden.',
   };
 
   final Map<String, String> _en = {
@@ -312,6 +316,10 @@ class AppStrings {
     'history_no_match': 'No matches.',
     'history_empty': 'No completed downloads yet.',
     'open_folder': 'Open folder',
+    'download_subtitles_label': 'Auto-download subtitles (SRT/VTT)',
+    'settings_wifi_priority': 'Prioritize WiFi',
+    'settings_mobile_data_allowed': 'Allow downloads over mobile data',
+    'download_blocked_mobile_data': 'Downloads over mobile data are disabled. Enable it in Settings or use WiFi.',
   };
 
   String lang;
