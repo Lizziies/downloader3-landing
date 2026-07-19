@@ -799,7 +799,7 @@ if (!st.isPremium) ...[
 const SizedBox(height: 8),
 Text(
 isDe
-? '🔒 Nur MP4 verfügbar — hol dir Premium für alle Formate!%
+? '🔒 Nur MP4 verfügbar — hol dir Premium für alle Formate!'
 : '🔒 Only MP4 available — get Premium for all formats!',
 style: const TextStyle(color: Color(0xFFFBBF24), fontSize: 11),
 ),
