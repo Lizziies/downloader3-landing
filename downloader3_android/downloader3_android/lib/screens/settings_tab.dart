@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import '../notification_helper.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 class SettingsTab extends StatefulWidget {
 final AppState state;
@@ -124,6 +125,38 @@ backupMsg = '✗ ${st.t('backup_restore_failed')}';
 }
 }
 
+Future<void> _pickMatchingColor(BuildContext context) async {
+Color picked = st.accent.main;
+final result = await showDialog<Color>(
+context: context,
+builder: (ctx) => AlertDialog(
+backgroundColor: kCardDark,
+title: Text(st.t('matching_mode_title'),
+style: const TextStyle(color: Colors.white)),
+content: SingleChildScrollView(
+child: ColorPicker(
+pickerColor: picked,
+onColorChanged: (c) => picked = c,
+enableAlpha: false,
+),
+),
+actions: [
+TextButton(
+onPressed: () => Navigator.of(ctx).pop(),
+child: Text(st.language == 'de' ? 'Abbrechen' : 'Cancel'),
+),
+ElevatedButton(
+onPressed: () => Navigator.of(ctx).pop(picked),
+child: Text(st.t('matching_apply')),
+),
+],
+),
+);
+if (result != null) {
+setState(() => st.setMatchingAccent(result));
+}
+}
+
 @override
 Widget build(BuildContext context) {
 return ListView(
@@ -169,6 +202,92 @@ color: Colors.white, size: 16)
 ],
 ),
 ),
+Padding(
+padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+child: Column(
+crossAxisAlignment: CrossAxisAlignment.start,
+children: [
+Text(st.t('matching_mode_title'),
+style: const TextStyle(
+color: Colors.white, fontWeight: FontWeight.bold)),
+const SizedBox(height: 4),
+Text(st.t('matching_mode_hint'),
+style: const TextStyle(color: kMuted, fontSize: 12)),
+const SizedBox(height: 8),
+Row(
+children: [
+Expanded(
+child: OutlinedButton(
+onPressed: () => _pickMatchingColor(context),
+child: Text(st.t('matching_apply')),
+),
+),
+if (st.store.matchingModeEnabled) ...[
+const SizedBox(width: 8),
+Expanded(
+child: OutlinedButton(
+onPressed: () => setState(st.resetMatchingMode),
+child: Text(st.t('matching_reset')),
+),
+),
+],
+],
+),
+],
+),
+),
+const Divider(color: kCardDark2),
+Padding(
+padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+child: Column(
+crossAxisAlignment: CrossAxisAlignment.start,
+children: [
+Text(st.t('settings_font_section_title'),
+style: const TextStyle(
+color: Colors.white, fontWeight: FontWeight.bold)),
+const SizedBox(height: 8),
+Text(st.t('settings_font_family'),
+style: const TextStyle(color: kMuted, fontSize: 12)),
+DropdownButton<String>(
+value: st.store.fontFamily,
+dropdownColor: kCardDark2,
+isExpanded: true,
+items: kFontOptions
+.map((f) => DropdownMenuItem(
+value: f.key,
+child: Text(f.label,
+style: const TextStyle(color: Colors.white)),
+))
+.toList(),
+onChanged: (v) {
+if (v != null) setState(() => st.setFontFamily(v));
+},
+),
+const SizedBox(height: 8),
+Text(
+'${st.t('settings_font_size')}: ${(st.store.fontSizeScale * 100).round()}%',
+style: const TextStyle(color: kMuted, fontSize: 12)),
+Slider(
+value: st.store.fontSizeScale,
+min: 0.8,
+max: 1.5,
+divisions: 14,
+activeColor: st.accent.main,
+label: '${(st.store.fontSizeScale * 100).round()}%',
+onChanged: (v) => setState(() => st.setFontSizeScale(v)),
+),
+const SizedBox(height: 4),
+OutlinedButton(
+onPressed: () => setState(() {
+st.setFontFamily('ComicNeue');
+st.setFontSizeScale(1.1);
+}),
+child: Text(st.t('settings_font_comic_preset')),
+),
+],
+),
+),
+const Divider(color: kCardDark2),
 const Divider(color: kCardDark2),
 SwitchListTile(
 title: Text(st.t('settings_wifi_priority'),
