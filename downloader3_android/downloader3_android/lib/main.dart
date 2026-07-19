@@ -76,7 +76,11 @@ class _Downloader3AppState extends State<Downloader3App> {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Downloader<3',
-          theme: buildAppTheme(state.accent),
+          theme: buildAppTheme(
+            state.accent,
+            fontFamily: resolveFontFamily(state.fontFamily),
+            fontSizeScale: state.fontSizeScale,
+          ),
           home: loggedIn ? HomeShell(state: state) : AuthScreen(state: state),
         );
       },
