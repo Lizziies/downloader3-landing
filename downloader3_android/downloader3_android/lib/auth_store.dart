@@ -19,6 +19,8 @@ static const _kPremiumUntil = 'premium_until';
 static const _kPremiumRole = 'premium_role';
 static const _kWifiPriority = 'wifi_priority';
 static const _kMobileDataAllowed = 'mobile_data_allowed';
+  static const _kNotificationsEnabled = 'notifications_enabled';
+  static const _kAutoBackupEnabled = 'auto_backup_enabled';
 
 final SharedPreferences prefs;
 AuthStore(this.prefs);
@@ -53,6 +55,12 @@ set wifiPriority(bool v) => prefs.setBool(_kWifiPriority, v);
 
 bool get mobileDataAllowed => prefs.getBool(_kMobileDataAllowed) ?? true;
 set mobileDataAllowed(bool v) => prefs.setBool(_kMobileDataAllowed, v);
+
+  bool get notificationsEnabled => prefs.getBool(_kNotificationsEnabled) ?? true;
+  set notificationsEnabled(bool v) => prefs.setBool(_kNotificationsEnabled, v);
+
+  bool get autoBackupEnabled => prefs.getBool(_kAutoBackupEnabled) ?? false;
+  set autoBackupEnabled(bool v) => prefs.setBool(_kAutoBackupEnabled, v);
 
 String? get currentEmail => prefs.getString(_kEmail);
 Future<void> setCurrentEmail(String? email) async {
@@ -249,4 +257,64 @@ if (exp == null || DateTime.now().isAfter(exp)) return 'expired';
 final candidate = sha256.convert(utf8.encode('vcode::$code')).toString();
 return candidate == hash ? 'ok' : 'wrong';
 }
+
+  // --- 💾 Backup/Restore (einfache Version: liest/schreibt alle lokal
+  // gespeicherten Einstellungen als JSON) ----------------------------
+  Map<String, dynamic> exportBackup() {
+    return {
+      'language': language,
+      'accent': accent,
+      'backend_url': backendUrl,
+      'favorites': favorites,
+      'history': prefs.getString(_kHistory),
+      'stats_total_files': statsTotalFiles,
+      'stats_total_bytes': statsTotalBytes,
+      'stats_platforms': prefs.getString(_kStatsPlatforms),
+      'wifi_priority': wifiPriority,
+      'mobile_data_allowed': mobileDataAllowed,
+      'notifications_enabled': notificationsEnabled,
+      'auto_backup_enabled': autoBackupEnabled,
+    };
+  }
+
+  Future<void> importBackup(Map<String, dynamic> data) async {
+    if (data['language'] is String) language = data['language'] as String;
+    if (data['accent'] is String) accent = data['accent'] as String;
+    if (data['backend_url'] is String) {
+      backendUrl = data['backend_url'] as String;
+    }
+    if (data['favorites'] is List) {
+      try {
+        await _saveFavorites((data['favorites'] as List)
+            .map((e) => (e as Map)
+                .map((k, v) => MapEntry(k.toString(), v.toString())))
+            .toList());
+      } catch (_) {}
+    }
+    if (data['history'] is String) {
+      await prefs.setString(_kHistory, data['history'] as String);
+    }
+    if (data['stats_total_files'] is int) {
+      await prefs.setInt(_kStatsFiles, data['stats_total_files'] as int);
+    }
+    if (data['stats_total_bytes'] is int) {
+      await prefs.setInt(_kStatsBytes, data['stats_total_bytes'] as int);
+    }
+    if (data['stats_platforms'] is String) {
+      await prefs.setString(
+          _kStatsPlatforms, data['stats_platforms'] as String);
+    }
+    if (data['wifi_priority'] is bool) {
+      wifiPriority = data['wifi_priority'] as bool;
+    }
+    if (data['mobile_data_allowed'] is bool) {
+      mobileDataAllowed = data['mobile_data_allowed'] as bool;
+    }
+    if (data['notifications_enabled'] is bool) {
+      notificationsEnabled = data['notifications_enabled'] as bool;
+    }
+    if (data['auto_backup_enabled'] is bool) {
+      autoBackupEnabled = data['auto_backup_enabled'] as bool;
+    }
+  }
 }
