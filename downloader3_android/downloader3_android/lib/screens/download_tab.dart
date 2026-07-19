@@ -49,7 +49,7 @@ _PlatformOption('direct', '🔗 Direkt-Link', '🔗 Direct link', true),
 /// 📐 Auflösungsliste -- 1:1 aus RES_LIST/RES_HEIGHT/RES_FREE_SET
 /// (main.py, Zeilen ~126-139) übernommen.
 const List<String> _kResList = ['480p', '720p', '1080p', '1440p', '4K'];
-const Set<String> _kResFree = {'480p', '720p'};
+const Set<String> _kResFree = {'480p', '720p', '1080p'};
 const Map<String, int> _kResHeight = {
 '480p': 480,
 '720p': 720,
@@ -64,16 +64,16 @@ const Map<String, int> _kResHeight = {
 /// kann (Bild-Endungen wie jpg/png/gif sind bewusst ausgeklammert --
 /// die bräuchten einen eigenen Thumbnail-Extraktionspfad).
 const Map<String, List<String>> _kPlatformFreeFormats = {
-'youtube': ['mp4'],
-'tiktok': ['mp4'],
-'instagram': ['mp4'],
-'facebook': ['mp4'],
+'youtube': ['mp4', 'mp3'],
+'tiktok': ['mp4', 'mp3'],
+'instagram': ['mp4', 'mp3'],
+'facebook': ['mp4', 'mp3'],
 };
 const Map<String, List<String>> _kPlatformPremiumFormats = {
-'youtube': ['mp3', 'wav', 'm4a', 'aac', 'flac', 'ogg', 'webm', 'mkv', 'mov'],
-'tiktok': ['mp3', 'wav', 'mov', 'webm'],
-'instagram': ['mp3', 'wav', 'm4a', 'webm', 'mov'],
-'facebook': ['mp3', 'wav', 'webm', 'mov'],
+'youtube': ['wav', 'm4a', 'aac', 'flac', 'ogg', 'webm', 'mkv', 'mov'],
+'tiktok': ['wav', 'mov', 'webm'],
+'instagram': ['wav', 'm4a', 'webm', 'mov'],
+'facebook': ['wav', 'webm', 'mov'],
 };
 const Set<String> _kAudioExts = {'mp3', 'wav', 'm4a', 'aac', 'flac', 'ogg'};
 
@@ -383,7 +383,9 @@ final processId = await NativeDownloader.startDownload(
 url: url,
 isAudio: isAudio,
 format: safeFormat,
-height: st.isPremium ? _kResHeight[resolution] : 720,
+height: (_kResFree.contains(resolution) || st.isPremium)
+? _kResHeight[resolution]
+: _kResHeight['1080p'],
 // 📋 Warteschlangen-Einträge sind am Desktop IMMER
 // Einzel-Downloads, nie Playlists (siehe _download_one_sync).
 playlist: false,
@@ -714,13 +716,7 @@ onPressed: () => setState(() => format = 'mp4'),
 child: Text('🎬 ${isDe ? "Video" : "Video"}'),
 ),
 OutlinedButton(
-onPressed: () async {
-if (!st.isPremium) {
-await _showPremiumLockedDialog();
-return;
-}
-setState(() => format = 'mp3');
-},
+onPressed: () => setState(() => format = 'mp3'),
 child: Text('🎵 ${isDe ? "Musik" : "Music"}'),
 ),
 OutlinedButton(
