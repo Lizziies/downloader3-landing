@@ -109,6 +109,21 @@ color: Colors.white, size: 16)
 ),
 ),
 const Divider(color: kCardDark2),
+SwitchListTile(
+title: Text(st.t('settings_wifi_priority'),
+style: const TextStyle(color: Colors.white)),
+value: st.store.wifiPriority,
+activeColor: st.accent.main,
+onChanged: (v) => setState(() => st.store.wifiPriority = v),
+),
+SwitchListTile(
+title: Text(st.t('settings_mobile_data_allowed'),
+style: const TextStyle(color: Colors.white)),
+value: st.store.mobileDataAllowed,
+activeColor: st.accent.main,
+onChanged: (v) => setState(() => st.store.mobileDataAllowed = v),
+),
+const Divider(color: kCardDark2),
 ListTile(
 leading: const Icon(Icons.system_update, color: kMuted),
 title: Text(st.t('settings_check_update'),
